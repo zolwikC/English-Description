@@ -5,156 +5,281 @@
 <title>Łączenie słów</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js"></script>
 <style>
-  body { font-family: Arial, sans-serif; }
+  body { 
+    font-family: Arial, sans-serif; 
+    background-color: #f3f3f3; 
+    text-align: center; 
+    margin: 0;
+    padding: 0;
+  }
+
+  h1 {
+    font-size: 2.2em;
+    color: #444;
+    margin-top: 20px;
+  }
+
+  .instructions {
+    font-size: 1.2em;
+    margin: 15px auto;
+    color: #666;
+    max-width: 80%;
+    padding: 10px;
+    background: #ffffff;
+    border-radius: 10px;
+  }
+
   .container {
     display: flex;
     justify-content: space-between;
-    position: relative;
-    height: 100vh;
+    align-items: flex-start;
+    margin-top: 20px;
     padding: 20px;
   }
+
   .column {
     width: 45%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
   }
+
   .word {
-    padding: 8px 12px;
+    padding: 15px 25px;
     margin: 10px;
-    border: 1px solid black;
-    background-color: #f9f9f9;
+    border-radius: 20px;
+    border: 2px solid #333;
+    background-color: #ffeb3b;
     cursor: pointer;
     user-select: none;
-    font-size: 150%;
-    transition: background-color 0.3s, border-color 0.3s;
+    font-size: 1.5em;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+    min-width: 160px;
   }
+
+  .word:hover {
+    transform: scale(1.1);
+    background-color: #ffd600;
+  }
+
   .selected {
     background-color: blue;
     color: white;
   }
+
+  .buttons-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    gap: 15px;
+  }
+
   button {
-    position: fixed;
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 15px 25px;
+    font-size: 18px;
+    font-weight: bold;
     cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    transition: all 0.3s;
   }
+
   #checkButton {
-    right: 20px;
-    bottom: 20px;
+    background-color: #4CAF50;
+    color: white;
   }
+
+  #checkButton:hover {
+    background-color: #388E3C;
+  }
+
+  #shuffleButton {
+    background-color: #FFA500;
+    color: white;
+  }
+
+  #shuffleButton:hover {
+    background-color: #E69500;
+  }
+
   #refreshButton {
-    left: 20px;
-    bottom: 20px;
+    background-color: #F44336;
+    color: white;
+  }
+
+  #refreshButton:hover {
+    background-color: #D32F2F;
+  }
+
+  .feedback {
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-top: 20px;
   }
 </style>
 </head>
 <body>
-<h1 style="text-align:center;">Dopasuj angielskie słowa do polskich odpowiedników</h1>
+
+<h1>Dopasuj angielskie słowa do polskich odpowiedników</h1>
+<p class="instructions">Kliknij słowo w języku angielskim, a następnie jego polski odpowiednik, aby je połączyć.</p>
+
+<div class="input-container">
+  <input type="text" id="englishInput" placeholder="Wpisz angielskie słowo" autocomplete="off">
+  <input type="text" id="polishInput" placeholder="Wpisz polskie słowo" autocomplete="off">
+  <button onclick="addCustomWord()">➕ Dodaj słowo</button>
+</div>
 
 <div class="container">
   <div class="column" id="englishWords"></div>
   <div class="column" id="polishWords"></div>
 </div>
-<button id="checkButton" onclick="checkAnswers()">Sprawdź odpowiedzi</button>
-<button id="refreshButton" onclick="confirmRefresh()">Odśwież stronę</button>
+
+<div class="buttons-container">
+  <button id="checkButton" onclick="checkAnswers()">✅ Sprawdź odpowiedzi</button>
+  <button id="refreshButton" onclick="resetWords()">🔄 Resetuj zestaw</button>
+</div>
+
+<p class="feedback" id="feedbackText"></p>
 
 <script>
-  // Lista par słów angielskich i polskich
-  const words = [
-    { pl: "szynka", en: "ham" },
-    { pl: "ser", en: "cheese" },
-    { pl: "pomidor", en: "tomato" },
-    { pl: "kurczak", en: "chicken" },
-    { pl: "marchewka", en: "carrot" },
-    { pl: "jogurt", en: "yoghurt" },
-    { pl: "banan", en: "banana" },
-    { pl: "jabłko", en: "apple" },
-    { pl: "owoce", en: "fruit" },
-    { pl: "produkty mleczne", en: "milk products" },
-    { pl: "warzywa", en: "vegetables" },
-    { pl: "mięso", en: "meat" }
+  let words = [
+  { "pl": "Ucho", "en": "Ear" },
+  { "pl": "Ząb", "en": "Tooth" },
+  { "pl": "Brzuch", "en": "Tummy" },
+  { "pl": "Szyja", "en": "Neck" },
+  { "pl": "Plecy", "en": "Back" },
+  { "pl": "Palec (u ręki)", "en": "Finger" },
+  { "pl": "Palec (u stopy)", "en": "Toe" },
+  { "pl": "Głowa", "en": "Head" },
+  { "pl": "Głodny", "en": "Hungry" },
+  { "pl": "Zmęczony", "en": "Tired" },
+  { "pl": "Znudzony", "en": "Bored" },
+  { "pl": "Zimno", "en": "Cold" },
+  { "pl": "Spragniony", "en": "Thirsty" },
+  { "pl": "Gorąco", "en": "Hot" }
   ];
 
-  let lastSelected = null; // Przechowuje ostatnio wybrane słowo
-  const lines = []; // Przechowuje linie łączące słowa
-  const connections = new Map(); // Przechowuje połączenia między słowami
+  let lastSelected = null;
+  let lines = [];
+  let checkUsed = false;
 
-  // Funkcja mieszająca elementy w tablicy
+    
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [array[i], array[j]] = [array[j], array[i]];
     }
   }
+  function enterFullscreen() {
+    let elem = document.documentElement;
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    } else if (elem.mozRequestFullScreen) { // Firefox
+        elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) { // Chrome, Safari, Edge
+        elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { // Internet Explorer
+        elem.msRequestFullscreen();
+    }
+}
 
-  // Funkcja ustawiająca słowa w kolumnach
+function exitFullscreen() {
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.mozCancelFullScreen) { 
+        document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) { 
+        document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) { 
+        document.msExitFullscreen();
+    }
+}
+
+window.onload = function() {
+    enterFullscreen();
+};
   function setupWords() {
-    const englishColumn = document.getElementById('englishWords');
-    const polishColumn = document.getElementById('polishWords');
-    const englishWords = words.map(word => ({ text: word.en, lang: 'en' }));
-    const polishWords = words.map(word => ({ text: word.pl, lang: 'pl' }));
+    document.getElementById('englishWords').innerHTML = "";
+    document.getElementById('polishWords').innerHTML = "";
     
-    shuffleArray(englishWords); // Mieszaj angielskie słowa
-    shuffleArray(polishWords); // Mieszaj polskie słowa
+    let englishWords = [...words];
+    let polishWords = [...words];
 
-    // Dodaj angielskie słowa do kolumny
-    englishWords.forEach(word => {
-      const div = document.createElement('div');
-      div.textContent = word.text;
-      div.className = 'word';
-      englishColumn.appendChild(div);
-      div.addEventListener('click', () => connectWords(div, word.text));
-    });
+    shuffleArray(englishWords);
+    shuffleArray(polishWords);
 
-    // Dodaj polskie słowa do kolumny
-    polishWords.forEach(word => {
-      const div = document.createElement('div');
-      div.textContent = word.text;
-      div.className = 'word';
-      polishColumn.appendChild(div);
-      div.addEventListener('click', () => connectWords(div, word.text));
-    });
+    englishWords.forEach(({ en }) => createWordElement(en, 'englishWords'));
+    polishWords.forEach(({ pl }) => createWordElement(pl, 'polishWords'));
+    
+    lines.forEach(({ line }) => line.remove());
+    lines = [];
   }
 
-  // Funkcja łącząca wybrane słowa
+  function createWordElement(text, columnId) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    div.className = 'word';
+    document.getElementById(columnId).appendChild(div);
+    div.addEventListener('click', () => connectWords(div, text));
+  }
+
   function connectWords(div, text) {
+    // Jeśli użytkownik kliknie ponownie na to samo słowo, cofamy wybór
+    if (lastSelected && lastSelected.div === div) {
+        div.classList.remove('selected');
+        lastSelected = null;
+        return;
+    }
+
+    // Jeśli użytkownik wybierze słowo z innej kolumny, tworzymy połączenie
     if (lastSelected && lastSelected !== div && lastSelected.parentNode !== div.parentNode) {
-      const line = new LeaderLine(lastSelected.div, div, { endPlug: 'arrow3', startSocket: 'right', endSocket: 'left', color: 'black', size: 2 });
-      lines.push(line);
-      connections.set(line, { start: lastSelected.text, end: text });
-      lastSelected.div.classList.remove('selected'); // Usuń podświetlenie z ostatnio wybranego słowa
-      lastSelected = null;
+        const line = new LeaderLine(lastSelected.div, div, { color: 'black', size: 2 });
+        lines.push({ line, start: lastSelected.text, end: text });
+        lastSelected.div.classList.remove('selected');
+        lastSelected = null;
     } else {
-      if (lastSelected) {
-        lastSelected.div.classList.remove('selected'); // Usuń podświetlenie z poprzednio wybranego słowa
-      }
-      lastSelected = { div, text };
-      div.classList.add('selected'); // Podświetl wybrane słowo
+        // Jeśli użytkownik wybiera nowe słowo w tej samej kolumnie, zmieniamy wybór
+        if (lastSelected) lastSelected.div.classList.remove('selected');
+        lastSelected = { div, text };
+        div.classList.add('selected');
     }
-  }
+}
 
-  // Funkcja sprawdzająca poprawność połączeń
+
   function checkAnswers() {
-    lines.forEach(line => {
-      const pair = connections.get(line);
-      if (words.find(word => word.en === pair.start && word.pl === pair.end) || words.find(word => word.pl === pair.start && word.en === pair.end)) {
-        line.setOptions({ color: 'green' }); // Zielony kolor dla poprawnych połączeń
-      } else {
-        line.setOptions({ color: 'red' }); // Czerwony kolor dla niepoprawnych połączeń
-      }
+    if (checkUsed) return;
+    checkUsed = true;
+
+    let correctCount = 0;
+    lines.forEach(({ line, start, end }) => {
+      const isCorrect = words.some(word => (word.en === start && word.pl === end) || (word.pl === start && word.en === end));
+      line.setOptions({ color: isCorrect ? 'green' : 'red' });
+      if (isCorrect) correctCount++;
     });
+
+    document.getElementById('feedbackText').textContent = `✔️ Poprawne odpowiedzi: ${correctCount}/${lines.length}`;
   }
 
-  // Funkcja z potwierdzeniem przed odświeżeniem strony
-  function confirmRefresh() {
-    if (confirm("Czy na pewno chcesz odświeżyć stronę? Wszystkie połączenia zostaną utracone.")) {
-      location.reload();
+  function addCustomWord() {
+    const en = document.getElementById('englishInput').value.trim();
+    const pl = document.getElementById('polishInput').value.trim();
+    if (en && pl) {
+      words.push({ en, pl });
+      setupWords();
     }
   }
 
-  // Ustawienie słów przy załadowaniu strony
+  function shuffleWords() {
+    setupWords();
+  }
+
+  function resetWords() {
+    location.reload();
+  }
+
   window.onload = setupWords;
 </script>
 </body>
