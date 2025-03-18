@@ -21,4 +21,4 @@ Repeat until all words are matched.
 Click the "Check Answers" button to see which connections are correct (green lines) and which are incorrect (red lines).
 To generate new words, click the "Refresh Page" button.
 Author
-zolwikC Krystian Staśkiewicz
+zolwikC
