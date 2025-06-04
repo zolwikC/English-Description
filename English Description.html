@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Łączenie słów</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
 <style>
   body { 
     font-family: Arial, sans-serif; 
@@ -125,6 +126,9 @@
 
 <h1>Dopasuj angielskie słowa do polskich odpowiedników</h1>
 <p class="instructions">Kliknij słowo w języku angielskim, a następnie jego polski odpowiednik, aby je połączyć.</p>
+<div class="mb-3">
+  <select id="categorySelect" class="form-select w-auto mx-auto" onchange="changeCategory(this.value)"></select>
+</div>
 
 <div class="input-container">
   <input type="text" id="englishInput" placeholder="Wpisz angielskie słowo" autocomplete="off">
@@ -142,25 +146,50 @@
   <button id="refreshButton" onclick="resetWords()">🔄 Resetuj zestaw</button>
 </div>
 
+<div id="statsPanel" class="modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Wyniki</h5>
+        <button type="button" class="btn-close" onclick="closeStats()"></button>
+      </div>
+      <div class="modal-body">
+        <p id="statsText"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <p class="feedback" id="feedbackText"></p>
 
 <script>
-  let words = [
-  { "pl": "Ucho", "en": "Ear" },
-  { "pl": "Ząb", "en": "Tooth" },
-  { "pl": "Brzuch", "en": "Tummy" },
-  { "pl": "Szyja", "en": "Neck" },
-  { "pl": "Plecy", "en": "Back" },
-  { "pl": "Palec (u ręki)", "en": "Finger" },
-  { "pl": "Palec (u stopy)", "en": "Toe" },
-  { "pl": "Głowa", "en": "Head" },
-  { "pl": "Głodny", "en": "Hungry" },
-  { "pl": "Zmęczony", "en": "Tired" },
-  { "pl": "Znudzony", "en": "Bored" },
-  { "pl": "Zimno", "en": "Cold" },
-  { "pl": "Spragniony", "en": "Thirsty" },
-  { "pl": "Gorąco", "en": "Hot" }
-  ];
+  const categories = {
+    "Części ciała": [
+      { "pl": "Ucho", "en": "Ear" },
+      { "pl": "Ząb", "en": "Tooth" },
+      { "pl": "Brzuch", "en": "Tummy" },
+      { "pl": "Szyja", "en": "Neck" },
+      { "pl": "Plecy", "en": "Back" },
+      { "pl": "Palec (u ręki)", "en": "Finger" },
+      { "pl": "Palec (u stopy)", "en": "Toe" },
+      { "pl": "Głowa", "en": "Head" }
+    ],
+    "Uczucia": [
+      { "pl": "Głodny", "en": "Hungry" },
+      { "pl": "Zmęczony", "en": "Tired" },
+      { "pl": "Znudzony", "en": "Bored" },
+      { "pl": "Zimno", "en": "Cold" },
+      { "pl": "Spragniony", "en": "Thirsty" },
+      { "pl": "Gorąco", "en": "Hot" }
+    ]
+  };
+
+  const customWords = JSON.parse(localStorage.getItem('customWords') || '[]');
+
+  let words = [...categories[Object.keys(categories)[0]], ...customWords];
+  let score = 0;
+  let level = 1;
+  let startTime = Date.now();
 
   let lastSelected = null;
   let lines = [];
@@ -172,6 +201,36 @@
       const j = Math.floor(Math.random() * (i + 1));
       [array[i], array[j]] = [array[j], array[i]];
     }
+  }
+
+  function populateCategories() {
+    const select = document.getElementById('categorySelect');
+    Object.keys(categories).forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat;
+      option.textContent = cat;
+      select.appendChild(option);
+    });
+    const customOption = document.createElement('option');
+    customOption.value = 'Własne';
+    customOption.textContent = 'Własne';
+    select.appendChild(customOption);
+  }
+
+  function changeCategory(cat) {
+    if (cat === 'Własne') {
+      words = [...customWords];
+    } else {
+      words = [...categories[cat], ...customWords];
+    }
+    startTime = Date.now();
+    setupWords();
+  }
+
+  function speakWord(word) {
+    const utter = new SpeechSynthesisUtterance(word);
+    utter.lang = 'en-US';
+    window.speechSynthesis.speak(utter);
   }
   function enterFullscreen() {
     let elem = document.documentElement;
@@ -200,6 +259,8 @@ function exitFullscreen() {
 
 window.onload = function() {
     enterFullscreen();
+    populateCategories();
+    setupWords();
 };
   function setupWords() {
     document.getElementById('englishWords').innerHTML = "";
@@ -224,6 +285,9 @@ window.onload = function() {
     div.className = 'word';
     document.getElementById(columnId).appendChild(div);
     div.addEventListener('click', () => connectWords(div, text));
+    if (columnId === 'englishWords') {
+      div.addEventListener('mouseenter', () => speakWord(text));
+    }
   }
 
   function connectWords(div, text) {
@@ -259,15 +323,25 @@ window.onload = function() {
       line.setOptions({ color: isCorrect ? 'green' : 'red' });
       if (isCorrect) correctCount++;
     });
-
+    score += correctCount;
     document.getElementById('feedbackText').textContent = `✔️ Poprawne odpowiedzi: ${correctCount}/${lines.length}`;
+    const time = Math.round((Date.now() - startTime) / 1000);
+    if (score >= level * 10) {
+      level++;
+    }
+    document.getElementById('statsText').textContent = `Wynik rundy: ${correctCount}/${lines.length}\nŁączny wynik: ${score}\nPoziom: ${level}\nCzas: ${time}s`;
+    const modal = new bootstrap.Modal(document.getElementById('statsPanel'));
+    modal.show();
   }
 
   function addCustomWord() {
     const en = document.getElementById('englishInput').value.trim();
     const pl = document.getElementById('polishInput').value.trim();
     if (en && pl) {
-      words.push({ en, pl });
+      const newWord = { en, pl };
+      customWords.push(newWord);
+      localStorage.setItem('customWords', JSON.stringify(customWords));
+      words.push(newWord);
       setupWords();
     }
   }
@@ -277,10 +351,21 @@ window.onload = function() {
   }
 
   function resetWords() {
-    location.reload();
+    score = 0;
+    level = 1;
+    startTime = Date.now();
+    checkUsed = false;
+    setupWords();
   }
 
-  window.onload = setupWords;
+  function closeStats() {
+    const modalEl = document.getElementById('statsPanel');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+    checkUsed = false;
+  }
+
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

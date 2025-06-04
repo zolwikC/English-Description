@@ -13,6 +13,10 @@ Aplikacja internetowa stworzona w celu nauki języka angielskiego poprzez intera
 ✅ Tryb pełnoekranowy – aplikacja automatycznie uruchamia się w trybie pełnoekranowym, aby zapewnić lepsze wrażenia użytkownika.
 ✅ Przycisk zamknięcia aplikacji – użytkownik może zamknąć program jednym kliknięciem przycisku "X".
 ✅ Wbudowany samouczek – przez pierwsze 15 uruchomień aplikacja wyświetla przeźroczysty panel z instrukcjami obsługi, który zanika animacyjnie.
+✅ System punktów i poziomów – poprawne odpowiedzi zwiększają wynik, a po uzyskaniu odpowiedniej liczby punktów przechodzimy na wyższy poziom.
+✅ Kategorie słówek – można wybrać zestaw tematyczny z listy rozwijanej.
+✅ Zapisywanie własnych słów – dodane słówka zapisywane są w pamięci przeglądarki.
+✅ Odtwarzanie wymowy – najechanie na angielskie słowo odtwarza jego wymowę.
 
 💻 Technologie użyte w projekcie
 🔹 HTML5 – struktura strony.
