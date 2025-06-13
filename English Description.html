@@ -119,9 +119,85 @@
     font-weight: bold;
     margin-top: 20px;
   }
+
+  /* Authentication and messaging styles */
+  #authOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  #authBox {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: left;
+    width: 300px;
+  }
+
+  #authBox h2 {
+    margin-top: 0;
+  }
+
+  #userPanel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px;
+    justify-content: center;
+  }
+
+  #userPanel img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  #messages {
+    margin-top: 30px;
+  }
+
+  #messages div {
+    margin: 5px 0;
+  }
 </style>
 </head>
 <body>
+
+<div id="authOverlay">
+  <div id="authBox">
+    <h2>Logowanie</h2>
+    <input type="text" id="loginUser" placeholder="Nazwa użytkownika"><br>
+    <input type="password" id="loginPass" placeholder="Hasło"><br>
+    <button onclick="login()">Zaloguj</button>
+    <h2>Rejestracja</h2>
+    <input type="text" id="regUser" placeholder="Nazwa użytkownika"><br>
+    <input type="password" id="regPass" placeholder="Hasło"><br>
+    <input type="file" id="regAvatar" accept="image/*"><br>
+    <button onclick="registerUser()">Zarejestruj</button>
+  </div>
+</div>
+
+<div id="userPanel" style="display:none;">
+  <img id="avatarImg" src="" alt="avatar">
+  <span id="currentUser"></span>
+  <button onclick="logout()">Wyloguj</button>
+</div>
+
+<div id="messages" style="display:none;">
+  <h2>Wiadomości</h2>
+  <div id="messageList"></div>
+  <select id="recipient"></select><br>
+  <input type="text" id="messageText" placeholder="Treść wiadomości">
+  <button onclick="sendMessage()">Wyślij</button>
+</div>
 
 <h1>Dopasuj angielskie słowa do polskich odpowiedników</h1>
 <p class="instructions">Kliknij słowo w języku angielskim, a następnie jego polski odpowiednik, aby je połączyć.</p>
@@ -189,17 +265,18 @@
 function exitFullscreen() {
     if (document.exitFullscreen) {
         document.exitFullscreen();
-    } else if (document.mozCancelFullScreen) { 
+    } else if (document.mozCancelFullScreen) {
         document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) { 
+    } else if (document.webkitExitFullscreen) {
         document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) { 
+    } else if (document.msExitFullscreen) {
         document.msExitFullscreen();
     }
 }
 
 window.onload = function() {
     enterFullscreen();
+    initAuth();
 };
   function setupWords() {
     document.getElementById('englishWords').innerHTML = "";
@@ -280,7 +357,137 @@ window.onload = function() {
     location.reload();
   }
 
-  window.onload = setupWords;
+  /*** Authentication and Messaging ***/
+
+  function loadUsers() {
+    return JSON.parse(localStorage.getItem('users') || '[]');
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem('users', JSON.stringify(users));
+  }
+
+  function getCurrentUser() {
+    const user = localStorage.getItem('currentUser');
+    return user ? JSON.parse(user) : null;
+  }
+
+  function setCurrentUser(user) {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+  }
+
+  function initAuth() {
+    const user = getCurrentUser();
+    if (user) {
+      document.getElementById('authOverlay').style.display = 'none';
+      updateUserPanel(user);
+      setupWords();
+    } else {
+      document.getElementById('authOverlay').style.display = 'flex';
+    }
+    loadUserOptions();
+    loadMessages();
+  }
+
+  function registerUser() {
+    const username = document.getElementById('regUser').value.trim();
+    const password = document.getElementById('regPass').value;
+    const avatarInput = document.getElementById('regAvatar');
+
+    if (!username || !password) return;
+
+    const users = loadUsers();
+    if (users.some(u => u.username === username)) {
+      alert('Użytkownik już istnieje');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const avatar = e.target.result || '';
+      const newUser = { username, password, avatar };
+      users.push(newUser);
+      saveUsers(users);
+      alert('Zarejestrowano');
+      loadUserOptions();
+    };
+
+    if (avatarInput.files[0]) {
+      reader.readAsDataURL(avatarInput.files[0]);
+    } else {
+      reader.onload({ target: { result: '' } });
+    }
+  }
+
+  function login() {
+    const username = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value;
+    const users = loadUsers();
+    const user = users.find(u => u.username === username && u.password === password);
+    if (user) {
+      setCurrentUser(user);
+      document.getElementById('authOverlay').style.display = 'none';
+      updateUserPanel(user);
+      setupWords();
+      loadMessages();
+    } else {
+      alert('Błędne dane logowania');
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('currentUser');
+    document.getElementById('userPanel').style.display = 'none';
+    document.getElementById('messages').style.display = 'none';
+    document.getElementById('authOverlay').style.display = 'flex';
+  }
+
+  function updateUserPanel(user) {
+    document.getElementById('avatarImg').src = user.avatar || '';
+    document.getElementById('currentUser').textContent = user.username;
+    document.getElementById('userPanel').style.display = 'flex';
+    document.getElementById('messages').style.display = 'block';
+  }
+
+  function loadUserOptions() {
+    const select = document.getElementById('recipient');
+    const users = loadUsers();
+    select.innerHTML = '';
+    users.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.username;
+      opt.textContent = u.username;
+      select.appendChild(opt);
+    });
+  }
+
+  function loadMessages() {
+    const messageList = document.getElementById('messageList');
+    const messages = JSON.parse(localStorage.getItem('messages') || '[]');
+    const user = getCurrentUser();
+    messageList.innerHTML = '';
+    if (!user) return;
+    messages.filter(m => m.to === user.username || m.from === user.username)
+      .forEach(m => {
+        const div = document.createElement('div');
+        div.textContent = `${m.from} ➡ ${m.to}: ${m.text}`;
+        messageList.appendChild(div);
+      });
+  }
+
+  function sendMessage() {
+    const user = getCurrentUser();
+    if (!user) return;
+    const to = document.getElementById('recipient').value;
+    const text = document.getElementById('messageText').value.trim();
+    if (!text) return;
+    const messages = JSON.parse(localStorage.getItem('messages') || '[]');
+    messages.push({ from: user.username, to, text });
+    localStorage.setItem('messages', JSON.stringify(messages));
+    document.getElementById('messageText').value = '';
+    loadMessages();
+  }
+
 </script>
 </body>
 </html>
