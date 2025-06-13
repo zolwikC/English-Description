@@ -1,6 +1,7 @@
 Dopasowywanie słów (Word Matching)
 📌 Opis projektu
 Aplikacja internetowa stworzona w celu nauki języka angielskiego poprzez interaktywne dopasowywanie angielskich słów do ich polskich odpowiedników. Program skierowany jest głównie do dzieci oraz osób uczących się języka angielskiego, aby umożliwić im przyswajanie nowego słownictwa w przyjemny i angażujący sposób.
+W najnowszej wersji dodano prosty system kont użytkowników wraz z możliwością przesłania awatara oraz wysyłania wiadomości tekstowych do innych zarejestrowanych osób.
 
 🎯 Funkcje aplikacji
 ✅ Losowe generowanie słów – każdorazowe uruchomienie aplikacji miesza słowa, aby uniknąć zapamiętywania kolejności.
@@ -13,6 +14,8 @@ Aplikacja internetowa stworzona w celu nauki języka angielskiego poprzez intera
 ✅ Tryb pełnoekranowy – aplikacja automatycznie uruchamia się w trybie pełnoekranowym, aby zapewnić lepsze wrażenia użytkownika.
 ✅ Przycisk zamknięcia aplikacji – użytkownik może zamknąć program jednym kliknięciem przycisku "X".
 ✅ Wbudowany samouczek – przez pierwsze 15 uruchomień aplikacja wyświetla przeźroczysty panel z instrukcjami obsługi, który zanika animacyjnie.
+✅ Logowanie i rejestracja użytkowników z możliwością dodania awatara.
+✅ Prosty system wiadomości między użytkownikami.
 
 💻 Technologie użyte w projekcie
 🔹 HTML5 – struktura strony.
