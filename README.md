@@ -32,3 +32,5 @@ Aplikacja internetowa stworzona w celu nauki języka angielskiego poprzez intera
 Projekt jest dostępny na licencji MIT License, co oznacza, że każdy może go używać, modyfikować i rozpowszechniać zgodnie z warunkami tej licencji.
 
 👨‍💻 Autor: zolwikC
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4d1b513c-34b3-437e-a799-ead095e5de9e" />
