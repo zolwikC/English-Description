@@ -1,286 +1,562 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<title>Łączenie słów</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js"></script>
-<style>
-  body { 
-    font-family: Arial, sans-serif; 
-    background-color: #f3f3f3; 
-    text-align: center; 
-    margin: 0;
-    padding: 0;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Łączenie słów — elegancka wersja</title>
+  <!-- LeaderLine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js" defer></script>
 
-  h1 {
-    font-size: 2.2em;
-    color: #444;
-    margin-top: 20px;
-  }
+  <style>
+    :root {
+      /* Pastelowy, przyjemny motyw */
+      --bg-start: #f7f9fc;
+      --bg-end: #eef3ff;
+      --card: #ffffffcc;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #5b8def;   /* niebieski pastel */
+      --primary-600: #4478ec;
+      --accent: #60d2c6;    /* morski */
+      --accent-600: #43c4b5;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --pill: #fff7d6;      /* delikatny żółty */
+      --pill-border: #c9b85a;
+      --shadow: 0 10px 30px rgba(17, 24, 39, .08);
+      --radius: 18px;
+    }
 
-  .instructions {
-    font-size: 1.2em;
-    margin: 15px auto;
-    color: #666;
-    max-width: 80%;
-    padding: 10px;
-    background: #ffffff;
-    border-radius: 10px;
-  }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
 
-  .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-top: 20px;
-    padding: 20px;
-  }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(160deg, var(--bg-start), var(--bg-end));
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-  .column {
-    width: 45%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px clamp(12px, 2vw, 32px);
+    }
 
-  .word {
-    padding: 15px 25px;
-    margin: 10px;
-    border-radius: 20px;
-    border: 2px solid #333;
-    background-color: #ffeb3b;
-    cursor: pointer;
-    user-select: none;
-    font-size: 1.5em;
-    font-weight: bold;
-    transition: all 0.3s ease-in-out;
-    text-align: center;
-    min-width: 160px;
-  }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 8px 0 16px;
+    }
 
-  .word:hover {
-    transform: scale(1.1);
-    background-color: #ffd600;
-  }
+    h1 {
+      font-size: clamp(22px, 3vw, 32px);
+      margin: 0;
+      letter-spacing: 0.2px;
+      color: var(--text);
+    }
 
-  .selected {
-    background-color: blue;
-    color: white;
-  }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-  .buttons-container {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 20px;
-    gap: 15px;
-  }
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(14px, 2vw, 22px);
+      border: 1px solid rgba(148, 163, 184, .25);
+    }
 
-  button {
-    padding: 15px 25px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-    border-radius: 10px;
-    transition: all 0.3s;
-  }
+    .instructions {
+      color: var(--muted);
+      font-size: clamp(14px, 1.7vw, 16px);
+      margin: 6px 0 18px;
+    }
 
-  #checkButton {
-    background-color: #4CAF50;
-    color: white;
-  }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
 
-  #checkButton:hover {
-    background-color: #388E3C;
-  }
+    @media (min-width: 900px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
 
-  #shuffleButton {
-    background-color: #FFA500;
-    color: white;
-  }
+    .column {
+      min-height: 420px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      position: relative; /* dla linii */
+    }
 
-  #shuffleButton:hover {
-    background-color: #E69500;
-  }
+    .col-title {
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .3px;
+      margin-bottom: 6px;
+    }
 
-  #refreshButton {
-    background-color: #F44336;
-    color: white;
-  }
+    .word {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: 2px solid var(--pill-border);
+      background: var(--pill);
+      user-select: none;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: .2px;
+      font-size: clamp(16px, 1.8vw, 20px);
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+      box-shadow: 0 2px 0 rgba(0,0,0,.05);
+      min-height: 48px;
+    }
 
-  #refreshButton:hover {
-    background-color: #D32F2F;
-  }
+    .word:hover { transform: translateY(-1px); }
+    .word:active { transform: translateY(0); }
 
-  .feedback {
-    font-size: 1.8em;
-    font-weight: bold;
-    margin-top: 20px;
-  }
-</style>
+    .word.selected {
+      outline: 3px solid color-mix(in oklab, var(--primary) 60%, transparent);
+      border-color: var(--primary);
+      box-shadow: 0 6px 18px rgba(69, 108, 255, .15);
+      background: #fffbe6;
+    }
+
+    .word.disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      filter: saturate(.6);
+    }
+
+    .inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .inputs input {
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid rgba(100,116,139,.35);
+      padding: 10px 14px;
+      font-size: 16px;
+      background: #fff;
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(0,0,0,.03);
+    }
+
+    .btn {
+      height: 44px;
+      padding: 0 16px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      cursor: pointer;
+      transition: transform .1s ease, box-shadow .2s ease, background .15s ease;
+      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btn.primary { background: var(--primary); color: #fff; }
+    .btn.primary:hover { background: var(--primary-600); }
+
+    .btn.accent { background: var(--accent); color: #0b3b35; }
+    .btn.accent:hover { background: var(--accent-600); }
+
+    .btn.warn { background: var(--warning); color: #3b2a00; }
+    .btn.warn:hover { filter: brightness(.95); }
+
+    .btn.danger { background: var(--danger); color: #fff; }
+    .btn.danger:hover { filter: brightness(.95); }
+
+    .footerbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+
+    .score {
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .progress {
+      width: 220px;
+      height: 10px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.06);
+    }
+
+    .progress > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--primary));
+      transition: width .3s ease;
+    }
+
+    .hint {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .columns-card {
+      position: relative;
+      isolation: isolate;
+    }
+
+    /* miejsce na linie (nad kartą, ale pod słowami) */
+    .lines-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* słowa powinny być nad liniami */
+    .columns-content { position: relative; z-index: 1; }
+
+    /* Notyfikacje */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      background: #111827;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transition: opacity .2s ease, transform .2s ease;
+      pointer-events: none;
+      font-size: 14px;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+  </style>
 </head>
 <body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Łączenie słów</h1>
+        <p class="instructions">Kliknij słowo po angielsku, a następnie jego polski odpowiednik, aby utworzyć połączenie.</p>
+      </div>
+      <div class="toolbar">
+        <button id="fullscreenBtn" class="btn accent" type="button" aria-label="Przełącz pełny ekran">⤢ Pełny ekran</button>
+        <button id="shuffleBtn" class="btn warn" type="button">🔀 Mieszaj</button>
+        <button id="resetBtn" class="btn danger" type="button">🔄 Reset</button>
+      </div>
+    </header>
 
-<h1>Dopasuj angielskie słowa do polskich odpowiedników</h1>
-<p class="instructions">Kliknij słowo w języku angielskim, a następnie jego polski odpowiednik, aby je połączyć.</p>
+    <section class="card" style="margin-bottom:14px;">
+      <div class="inputs">
+        <input id="englishInput" placeholder="Angielskie słowo" autocomplete="off" />
+        <input id="polishInput" placeholder="Polskie słowo" autocomplete="off" />
+        <button id="addBtn" class="btn primary" type="button">➕ Dodaj</button>
+      </div>
+      <p class="hint" style="margin-top:8px;">Podpowiedź: dodawaj własne pary, by rozszerzać zestaw. Kliknij <strong>Sprawdź</strong>, aby zobaczyć wynik.</p>
+    </section>
 
-<div class="input-container">
-  <input type="text" id="englishInput" placeholder="Wpisz angielskie słowo" autocomplete="off">
-  <input type="text" id="polishInput" placeholder="Wpisz polskie słowo" autocomplete="off">
-  <button onclick="addCustomWord()">➕ Dodaj słowo</button>
-</div>
+    <section class="card columns-card">
+      <div class="lines-layer" aria-hidden="true"></div>
 
-<div class="container">
-  <div class="column" id="englishWords"></div>
-  <div class="column" id="polishWords"></div>
-</div>
+      <div class="columns-content grid">
+        <div>
+          <div class="col-title">English</div>
+          <div id="englishCol" class="column" aria-label="Angielskie słowa"></div>
+        </div>
+        <div>
+          <div class="col-title">Polski</div>
+          <div id="polishCol" class="column" aria-label="Polskie słowa"></div>
+        </div>
+      </div>
 
-<div class="buttons-container">
-  <button id="checkButton" onclick="checkAnswers()">✅ Sprawdź odpowiedzi</button>
-  <button id="refreshButton" onclick="resetWords()">🔄 Resetuj zestaw</button>
-</div>
+      <div class="footerbar">
+        <div class="left">
+          <button id="checkBtn" class="btn primary" type="button">✅ Sprawdź odpowiedzi</button>
+          <button id="undoBtn" class="btn" type="button" style="background:#e5e7eb;">↶ Cofnij połączenie</button>
+        </div>
+        <div class="right" style="display:flex;align-items:center;gap:12px;">
+          <span id="scoreText" class="score">Poprawne: 0 / 0</span>
+          <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+        </div>
+      </div>
+    </section>
+  </div>
 
-<p class="feedback" id="feedbackText"></p>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script>
-  let words = [
-  { "pl": "Ucho", "en": "Ear" },
-  { "pl": "Ząb", "en": "Tooth" },
-  { "pl": "Brzuch", "en": "Tummy" },
-  { "pl": "Szyja", "en": "Neck" },
-  { "pl": "Plecy", "en": "Back" },
-  { "pl": "Palec (u ręki)", "en": "Finger" },
-  { "pl": "Palec (u stopy)", "en": "Toe" },
-  { "pl": "Głowa", "en": "Head" },
-  { "pl": "Głodny", "en": "Hungry" },
-  { "pl": "Zmęczony", "en": "Tired" },
-  { "pl": "Znudzony", "en": "Bored" },
-  { "pl": "Zimno", "en": "Cold" },
-  { "pl": "Spragniony", "en": "Thirsty" },
-  { "pl": "Gorąco", "en": "Hot" }
-  ];
+  <script>
+    // ====== Dane początkowe ======
+    const initialWords = [
+      { pl: "Zupa", en: "Soup" },
+      { pl: "Sałatka", en: "Salad" },
+      { pl: "Pizza", en: "Pizza" },
+      { pl: "Kapusta", en: "Cabbage" },
+      { pl: "Frytki", en: "Chips" },
+      { pl: "Pulpety", en: "Meatballs" },
+      { pl: "Makaron", en: "Pasta" },
+      { pl: "Kurczak", en: "Chicken" },
+      { pl: "Herbata", en: "Tea" },
+      { pl: "Śniadanie", en: "Breakfast" },
+      { pl: "Przekąska", en: "Snack" },
+      { pl: "Obiad", en: "Dinner" },
+      { pl: "Lunch", en: "Lunch" }
+    ];
 
-  let lastSelected = null;
-  let lines = [];
-  let checkUsed = false;
+    // ====== Stan gry ======
+    let words = [...initialWords];
+    let englishPool = []; // DOM elementy
+    let polishPool = [];
+    let selected = null;  // {div, lang, text}
+    let lines = [];       // { line, fromEl, toEl, fromText, toText }
 
-    
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+    // Blokada: jedno słowo -> max 1 połączenie
+    const usedEnglish = new WeakSet();
+    const usedPolish = new WeakSet();
+
+    const qs = (sel) => document.querySelector(sel);
+
+    // ====== Utils ======
+    function shuffle(arr){
+      for(let i = arr.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
     }
-  }
-  function enterFullscreen() {
-    let elem = document.documentElement;
-    if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-    } else if (elem.mozRequestFullScreen) { // Firefox
-        elem.mozRequestFullScreen();
-    } else if (elem.webkitRequestFullscreen) { // Chrome, Safari, Edge
-        elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) { // Internet Explorer
-        elem.msRequestFullscreen();
+
+    function toast(msg, ms = 1600){
+      const t = qs('#toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(()=> t.classList.remove('show'), ms);
     }
-}
 
-function exitFullscreen() {
-    if (document.exitFullscreen) {
-        document.exitFullscreen();
-    } else if (document.mozCancelFullScreen) { 
-        document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) { 
-        document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) { 
-        document.msExitFullscreen();
+    // ====== Tworzenie słów ======
+    function createWordEl(text, lang){
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'word';
+      el.textContent = text;
+      el.setAttribute('data-lang', lang);
+      el.setAttribute('aria-pressed', 'false');
+
+      el.addEventListener('click', () => onWordClick(el, lang, text));
+      return el;
     }
-}
 
-window.onload = function() {
-    enterFullscreen();
-};
-  function setupWords() {
-    document.getElementById('englishWords').innerHTML = "";
-    document.getElementById('polishWords').innerHTML = "";
-    
-    let englishWords = [...words];
-    let polishWords = [...words];
+    function renderColumns(){
+      const engCol = qs('#englishCol');
+      const plCol = qs('#polishCol');
+      engCol.innerHTML = '';
+      plCol.innerHTML = '';
 
-    shuffleArray(englishWords);
-    shuffleArray(polishWords);
+      const eng = [...words];
+      const pl = [...words];
+      shuffle(eng); shuffle(pl);
 
-    englishWords.forEach(({ en }) => createWordElement(en, 'englishWords'));
-    polishWords.forEach(({ pl }) => createWordElement(pl, 'polishWords'));
-    
-    lines.forEach(({ line }) => line.remove());
-    lines = [];
-  }
+      englishPool = eng.map(w => createWordEl(w.en, 'en'));
+      polishPool = pl.map(w => createWordEl(w.pl, 'pl'));
 
-  function createWordElement(text, columnId) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    div.className = 'word';
-    document.getElementById(columnId).appendChild(div);
-    div.addEventListener('click', () => connectWords(div, text));
-  }
+      englishPool.forEach(el => engCol.appendChild(el));
+      polishPool.forEach(el => plCol.appendChild(el));
 
-  function connectWords(div, text) {
-    // Jeśli użytkownik kliknie ponownie na to samo słowo, cofamy wybór
-    if (lastSelected && lastSelected.div === div) {
-        div.classList.remove('selected');
-        lastSelected = null;
+      // Po rerenderze trzeba przerysować linie
+      removeAllLines();
+      updateScore();
+    }
+
+    // ====== Logika łączenia ======
+    function onWordClick(el, lang, text){
+      // zablokowane elementy (już połączone)
+      if ((lang === 'en' && usedEnglish.has(el)) || (lang === 'pl' && usedPolish.has(el))) {
+        toast('To słowo już jest połączone.');
         return;
+      }
+
+      if (!selected){
+        selected = { el, lang, text };
+        el.classList.add('selected');
+        el.setAttribute('aria-pressed', 'true');
+        return;
+      }
+
+      // Kliknięcie w ten sam element = anuluj wybór
+      if (selected.el === el){
+        el.classList.remove('selected');
+        el.setAttribute('aria-pressed', 'false');
+        selected = null;
+        return;
+      }
+
+      // Dozwolone łączenie tylko EN -> PL lub PL -> EN
+      if (selected.lang === lang){
+        // zmień wybór w tej samej kolumnie
+        selected.el.classList.remove('selected');
+        selected.el.setAttribute('aria-pressed', 'false');
+        selected = { el, lang, text };
+        el.classList.add('selected');
+        el.setAttribute('aria-pressed', 'true');
+        return;
+      }
+
+      // Utwórz linię
+      const from = selected.lang === 'en' ? selected.el : el;
+      const to   = selected.lang === 'en' ? el : selected.el;
+      const fromText = (selected.lang === 'en') ? selected.text : text; // en
+      const toText   = (selected.lang === 'en') ? text : selected.text; // pl
+
+      const line = new LeaderLine(from, to, {
+        color: 'rgba(31,41,55,.85)',
+        size: 3,
+        startPlug: 'behind',
+        endPlug: 'arrow3',
+        path: 'fluid',
+        dropShadow: true,
+        startSocket: 'right',
+        endSocket: 'left',
+      });
+
+      lines.push({ line, fromEl: from, toEl: to, fromText, toText });
+
+      // Zablokuj wykorzystane słowa
+      usedEnglish.add(from);
+      usedPolish.add(to);
+      from.classList.add('disabled');
+      to.classList.add('disabled');
+
+      // Wyczyść wybór
+      selected.el.classList.remove('selected');
+      selected.el.setAttribute('aria-pressed', 'false');
+      selected = null;
+
+      updateScore(false);
     }
 
-    // Jeśli użytkownik wybierze słowo z innej kolumny, tworzymy połączenie
-    if (lastSelected && lastSelected !== div && lastSelected.parentNode !== div.parentNode) {
-        const line = new LeaderLine(lastSelected.div, div, { color: 'black', size: 2 });
-        lines.push({ line, start: lastSelected.text, end: text });
-        lastSelected.div.classList.remove('selected');
-        lastSelected = null;
-    } else {
-        // Jeśli użytkownik wybiera nowe słowo w tej samej kolumnie, zmieniamy wybór
-        if (lastSelected) lastSelected.div.classList.remove('selected');
-        lastSelected = { div, text };
-        div.classList.add('selected');
+    function removeAllLines(){
+      lines.forEach(({ line }) => line.remove());
+      lines = [];
+      // odblokuj słowa
+      [...englishPool, ...polishPool].forEach(el => {
+        el.classList.remove('disabled', 'selected');
+        el.setAttribute('aria-pressed', 'false');
+      });
+      // reset zestawów
+      englishPool.forEach(el => usedEnglish.delete(el));
+      polishPool.forEach(el => usedPolish.delete(el));
     }
-}
 
+    function undoLast(){
+      const last = lines.pop();
+      if (!last){ toast('Brak połączeń do cofnięcia.'); return; }
+      last.line.remove();
+      last.fromEl.classList.remove('disabled');
+      last.toEl.classList.remove('disabled');
+      usedEnglish.delete(last.fromEl);
+      usedPolish.delete(last.toEl);
+      updateScore(false);
+    }
 
-  function checkAnswers() {
-    if (checkUsed) return;
-    checkUsed = true;
+    function checkAnswers(){
+      if (!lines.length){ toast('Najpierw utwórz przynajmniej jedno połączenie.'); return; }
+      let correct = 0;
+      lines.forEach(({ line, fromText, toText }) => {
+        const ok = words.some(w => w.en === fromText && w.pl === toText);
+        line.setOptions({ color: ok ? 'rgba(16,185,129,.95)' : 'rgba(239,68,68,.95)', size: 4 });
+        if (ok) correct++;
+      });
+      updateScore(true, correct, lines.length);
+    }
 
-    let correctCount = 0;
-    lines.forEach(({ line, start, end }) => {
-      const isCorrect = words.some(word => (word.en === start && word.pl === end) || (word.pl === start && word.en === end));
-      line.setOptions({ color: isCorrect ? 'green' : 'red' });
-      if (isCorrect) correctCount++;
-    });
+    function updateScore(afterCheck = false, correct = 0, total = 0){
+      const scoreEl = qs('#scoreText');
+      if (afterCheck) {
+        scoreEl.textContent = `Poprawne: ${correct} / ${total}`;
+        qs('#progressBar').style.width = total ? `${(correct / total) * 100}%` : '0%';
+      } else {
+        scoreEl.textContent = `Połączeń: ${lines.length}`;
+        qs('#progressBar').style.width = lines.length ? `${(lines.length / Math.max(words.length, 1)) * 100}%` : '0%';
+      }
+    }
 
-    document.getElementById('feedbackText').textContent = `✔️ Poprawne odpowiedzi: ${correctCount}/${lines.length}`;
-  }
-
-  function addCustomWord() {
-    const en = document.getElementById('englishInput').value.trim();
-    const pl = document.getElementById('polishInput').value.trim();
-    if (en && pl) {
+    function addCustomWord(){
+      const en = qs('#englishInput').value.trim();
+      const pl = qs('#polishInput').value.trim();
+      if (!en || !pl){ toast('Uzupełnij oba pola.'); return; }
+      if (words.some(w => w.en.toLowerCase() === en.toLowerCase() || w.pl.toLowerCase() === pl.toLowerCase())){
+        toast('Taka para już istnieje.'); return;
+      }
       words.push({ en, pl });
-      setupWords();
+      qs('#englishInput').value = '';
+      qs('#polishInput').value = '';
+      toast('Dodano nową parę słów ✔');
+      renderColumns();
     }
-  }
 
-  function shuffleWords() {
-    setupWords();
-  }
+    function shuffleAll(){ renderColumns(); toast('Wymieszano słowa.'); }
 
-  function resetWords() {
-    location.reload();
-  }
+    function hardReset(){
+      words = [...initialWords];
+      selected = null; removeAllLines(); renderColumns();
+      toast('Zestaw zresetowany.');
+    }
 
-  window.onload = setupWords;
-</script>
+    // ====== Fullscreen (na żądanie) ======
+    function toggleFullscreen(){
+      const d = document;
+      if (!d.fullscreenElement) {
+        const el = d.documentElement;
+        (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen).call(el);
+      } else {
+        (d.exitFullscreen || d.webkitExitFullscreen || d.mozCancelFullScreen || d.msExitFullscreen).call(d);
+      }
+    }
+
+    // Aktualizacja pozycji linii przy zmianie rozmiaru/przewinięciu
+    function syncLines(){ lines.forEach(({ line }) => line.position()); }
+
+    // ====== Inicjalizacja ======
+    function init(){
+      // Render
+      renderColumns();
+
+      // Zdarzenia UI
+      qs('#addBtn').addEventListener('click', addCustomWord);
+      qs('#checkBtn').addEventListener('click', checkAnswers);
+      qs('#undoBtn').addEventListener('click', undoLast);
+      qs('#shuffleBtn').addEventListener('click', shuffleAll);
+      qs('#resetBtn').addEventListener('click', hardReset);
+      qs('#fullscreenBtn').addEventListener('click', toggleFullscreen);
+
+      // reposition lines on window updates
+      window.addEventListener('resize', syncLines);
+      window.addEventListener('scroll', syncLines, true);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
