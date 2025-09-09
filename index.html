@@ -8,24 +8,50 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js" defer></script>
 
   <style>
+    /* ====== Zmienne motywów ====== */
     :root {
-      /* Pastelowy, przyjemny motyw */
+      /* domyślnie CIEMNY (jak w Twoim kodzie) */
+      --bg-start: #0b1220;
+      --bg-end: #0b1220;
+      --card: #111827cc;
+      --text: #e5e7eb;
+      --muted: #9aa3b2;
+      --primary: #5b8def;
+      --primary-600: #4478ec;
+      --accent: #60d2c6;
+      --accent-600: #43c4b5;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --pill: #1f2937;
+      --pill-border: #334155;
+      --line: rgba(229,231,235,.9);
+      --shadow: 0 10px 30px rgba(0, 0, 0, .25);
+      --radius: 18px;
+      --chip-bg: #0f172a;
+      --progress-bg: #0f172a;
+    }
+
+    /* Wersja JASNA – aktywuje się gdy <body data-theme="light"> */
+    body[data-theme="light"] {
       --bg-start: #f7f9fc;
       --bg-end: #eef3ff;
       --card: #ffffffcc;
       --text: #1f2937;
       --muted: #6b7280;
-      --primary: #5b8def;   /* niebieski pastel */
+      --primary: #5b8def;
       --primary-600: #4478ec;
-      --accent: #60d2c6;    /* morski */
+      --accent: #60d2c6;
       --accent-600: #43c4b5;
       --warning: #f59e0b;
       --danger: #ef4444;
       --success: #10b981;
-      --pill: #fff7d6;      /* delikatny żółty */
+      --pill: #fff7d6;
       --pill-border: #c9b85a;
-      --shadow: 0 10px 30px rgba(17, 24, 39, .08);
-      --radius: 18px;
+      --line: rgba(31,41,55,.85);
+      --shadow: 0 10px 30px rgba(17,24,39,.08);
+      --chip-bg: #eef2ff;
+      --progress-bg: #e5e7eb;
     }
 
     * { box-sizing: border-box; }
@@ -38,6 +64,7 @@
       background: linear-gradient(160deg, var(--bg-start), var(--bg-end));
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      transition: background .2s ease, color .2s ease;
     }
 
     .wrap {
@@ -52,6 +79,7 @@
       justify-content: space-between;
       gap: 12px;
       margin: 8px 0 16px;
+      flex-wrap: wrap;
     }
 
     h1 {
@@ -65,15 +93,17 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .card {
       background: var(--card);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(6px);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: clamp(14px, 2vw, 22px);
-      border: 1px solid rgba(148, 163, 184, .25);
+      border: 1px solid rgba(148, 163, 184, .18);
+      transition: background .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
 
     .instructions {
@@ -84,20 +114,26 @@
 
     .grid {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 18px;
     }
 
-    @media (min-width: 900px) {
-      .grid { grid-template-columns: 1fr 1fr; }
+    /* Mobile – jedna kolumna, wygodne klikanie */
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+      .column { min-height: 0; }
+      .footerbar { flex-direction: column; align-items: stretch; gap: 10px; }
+      .progress { width: 100%; }
+      .toolbar { width: 100%; justify-content: flex-start; }
     }
 
     .column {
-      min-height: 420px;
+      min-height: 460px;
       display: grid;
       align-content: start;
       gap: 12px;
       position: relative; /* dla linii */
+      padding-bottom: 6px;
     }
 
     .col-title {
@@ -111,7 +147,7 @@
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      padding: 12px 18px;
+      padding: 14px 18px;
       border-radius: 999px;
       border: 2px solid var(--pill-border);
       background: var(--pill);
@@ -119,10 +155,11 @@
       cursor: pointer;
       font-weight: 700;
       letter-spacing: .2px;
-      font-size: clamp(16px, 1.8vw, 20px);
+      font-size: clamp(16px, 1.9vw, 20px);
       transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
-      box-shadow: 0 2px 0 rgba(0,0,0,.05);
-      min-height: 48px;
+      box-shadow: 0 2px 0 rgba(0,0,0,.25);
+      min-height: 52px; /* większy hitbox na mobile */
+      color: var(--text);
     }
 
     .word:hover { transform: translateY(-1px); }
@@ -131,14 +168,14 @@
     .word.selected {
       outline: 3px solid color-mix(in oklab, var(--primary) 60%, transparent);
       border-color: var(--primary);
-      box-shadow: 0 6px 18px rgba(69, 108, 255, .15);
-      background: #fffbe6;
+      box-shadow: 0 6px 18px rgba(69, 108, 255, .25);
+      background: var(--chip-bg);
     }
 
     .word.disabled {
-      opacity: .55;
+      opacity: .6;
       cursor: not-allowed;
-      filter: saturate(.6);
+      filter: saturate(.85);
     }
 
     .inputs {
@@ -148,27 +185,35 @@
       align-items: center;
     }
 
+    @media (max-width: 560px) {
+      .inputs { grid-template-columns: 1fr; }
+      .inputs .btn { width: 100%; }
+    }
+
     .inputs input {
-      height: 44px;
+      height: 46px;
       border-radius: 12px;
       border: 1px solid rgba(100,116,139,.35);
       padding: 10px 14px;
       font-size: 16px;
-      background: #fff;
+      background: var(--chip-bg);
+      color: var(--text);
       outline: none;
-      box-shadow: inset 0 1px 0 rgba(0,0,0,.03);
+      box-shadow: inset 0 1px 0 rgba(0,0,0,.25);
+      transition: background .2s ease, color .2s ease, border-color .2s ease;
     }
 
     .btn {
-      height: 44px;
+      height: 46px;
       padding: 0 16px;
       border: none;
       border-radius: 12px;
       font-weight: 700;
       letter-spacing: .2px;
       cursor: pointer;
-      transition: transform .1s ease, box-shadow .2s ease, background .15s ease;
-      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+      transition: transform .1s ease, box-shadow .2s ease, background .15s ease, filter .15s;
+      box-shadow: 0 6px 16px rgba(0,0,0,.25);
+      color: #0b1220;
     }
 
     .btn:active { transform: translateY(1px); }
@@ -202,10 +247,11 @@
     .progress {
       width: 220px;
       height: 10px;
-      background: #e5e7eb;
+      background: var(--progress-bg);
       border-radius: 999px;
       overflow: hidden;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,.06);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.5);
+      transition: background .2s ease;
     }
 
     .progress > span {
@@ -221,12 +267,9 @@
       color: var(--muted);
     }
 
-    .columns-card {
-      position: relative;
-      isolation: isolate;
-    }
+    .columns-card { position: relative; isolation: isolate; }
 
-    /* miejsce na linie (nad kartą, ale pod słowami) */
+    /* miejsce na linie (nad kartą, ale pod słowami) – dla porządku */
     .lines-layer {
       position: absolute;
       inset: 0;
@@ -235,7 +278,15 @@
     }
 
     /* słowa powinny być nad liniami */
-    .columns-content { position: relative; z-index: 1; }
+    .columns-content { position: relative; z-index: 2; }
+
+    /* LeaderLine – ważne dla mobile */
+    .leader-line {
+      z-index: 0 !important;
+      pointer-events: none !important;
+      transition: opacity .15s ease;
+    }
+    body.hide-lines .leader-line { opacity: 0; }
 
     /* Notyfikacje */
     .toast {
@@ -252,9 +303,82 @@
       transition: opacity .2s ease, transform .2s ease;
       pointer-events: none;
       font-size: 14px;
+      z-index: 50;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+
+    /* Stopka z podpisem i przyciskiem GitHub */
+    .site-footer {
+      margin-top: 22px;
+      padding: 16px;
+      color: var(--muted);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
 
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+    .github-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--chip-bg);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,.35);
+      transition: background .2s ease, color .2s ease, filter .15s;
+    }
+    .github-btn:hover { filter: brightness(1.06); }
+    .github-btn svg { width: 18px; height: 18px; fill: currentColor; display: block; }
+
+    /* ====== Przełącznik motywu (radio) ====== */
+    .theme-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px;
+      background: var(--card);
+      border: 1px solid rgba(148, 163, 184, .18);
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+    }
+    .theme-switch .opt {
+      position: relative;
+    }
+    .theme-switch input {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 0;
+      height: 0;
+      position: absolute;
+      opacity: 0;
+    }
+    .theme-switch label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--muted);
+      user-select: none;
+      transition: background .15s ease, color .15s ease, box-shadow .15s;
+    }
+    .theme-switch input:checked + label {
+      background: var(--accent);
+      color: #0b3b35;
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    }
+    .theme-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: currentColor;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
@@ -264,7 +388,24 @@
         <h1>Łączenie słów</h1>
         <p class="instructions">Kliknij słowo po angielsku, a następnie jego polski odpowiednik, aby utworzyć połączenie.</p>
       </div>
+
       <div class="toolbar">
+        <!-- Przełącznik motywu (radio) -->
+        <div class="theme-switch" role="radiogroup" aria-label="Wybór motywu">
+          <div class="opt">
+            <input type="radio" name="theme" id="theme-light" value="light" />
+            <label for="theme-light" title="Jasny">
+              <span class="theme-dot" style="color:#fbc02d"></span> Jasny
+            </label>
+          </div>
+          <div class="opt">
+            <input type="radio" name="theme" id="theme-dark" value="dark" />
+            <label for="theme-dark" title="Ciemny">
+              <span class="theme-dot" style="color:#94a3b8"></span> Ciemny
+            </label>
+          </div>
+        </div>
+
         <button id="fullscreenBtn" class="btn accent" type="button" aria-label="Przełącz pełny ekran">⤢ Pełny ekran</button>
         <button id="shuffleBtn" class="btn warn" type="button">🔀 Mieszaj</button>
         <button id="resetBtn" class="btn danger" type="button">🔄 Reset</button>
@@ -295,16 +436,27 @@
       </div>
 
       <div class="footerbar">
-        <div class="left">
+        <div class="left" style="display:flex;gap:10px;flex-wrap:wrap;">
           <button id="checkBtn" class="btn primary" type="button">✅ Sprawdź odpowiedzi</button>
-          <button id="undoBtn" class="btn" type="button" style="background:#e5e7eb;">↶ Cofnij połączenie</button>
+          <button id="undoBtn" class="btn" type="button" style="background:var(--chip-bg);color:var(--text);">↶ Cofnij połączenie</button>
         </div>
-        <div class="right" style="display:flex;align-items:center;gap:12px;">
+        <div class="right" style="display:flex;align-items:center;gap:12px;min-width:220px;">
           <span id="scoreText" class="score">Poprawne: 0 / 0</span>
           <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
         </div>
       </div>
     </section>
+
+    <!-- Stopka z podpisem i linkiem do GitHuba -->
+    <footer class="site-footer">
+      <div>
+        © 2025 <strong>zowlikC</strong> — „Angielski dla mechanika / narzędziowca (moduł osobny część projektu SRS Fiszki)”
+      </div>
+      <a class="github-btn" href="https://github.com/zolwikC" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.45.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub profil
+      </a>
+    </footer>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -331,7 +483,7 @@
     let words = [...initialWords];
     let englishPool = []; // DOM elementy
     let polishPool = [];
-    let selected = null;  // {div, lang, text}
+    let selected = null;  // {el, lang, text}
     let lines = [];       // { line, fromEl, toEl, fromText, toText }
 
     // Blokada: jedno słowo -> max 1 połączenie
@@ -339,6 +491,7 @@
     const usedPolish = new WeakSet();
 
     const qs = (sel) => document.querySelector(sel);
+    const getVar = (name) => getComputedStyle(document.body).getPropertyValue(name).trim();
 
     // ====== Utils ======
     function shuffle(arr){
@@ -430,11 +583,11 @@
       const toText   = (selected.lang === 'en') ? text : selected.text; // pl
 
       const line = new LeaderLine(from, to, {
-        color: 'rgba(31,41,55,.85)',
+        color: getVar('--line') || 'rgba(229,231,235,.9)',
         size: 3,
         startPlug: 'behind',
         endPlug: 'arrow3',
-        path: 'fluid',
+        path: window.innerWidth <= 700 ? 'straight' : 'fluid', // na mobile prościej
         dropShadow: true,
         startSocket: 'right',
         endSocket: 'left',
@@ -498,7 +651,8 @@
         qs('#progressBar').style.width = total ? `${(correct / total) * 100}%` : '0%';
       } else {
         scoreEl.textContent = `Połączeń: ${lines.length}`;
-        qs('#progressBar').style.width = lines.length ? `${(lines.length / Math.max(words.length, 1)) * 100}%` : '0%';
+        const denom = Math.max(words.length, 1);
+        qs('#progressBar').style.width = `${(lines.length / denom) * 100}%`;
       }
     }
 
@@ -538,10 +692,35 @@
     // Aktualizacja pozycji linii przy zmianie rozmiaru/przewinięciu
     function syncLines(){ lines.forEach(({ line }) => line.position()); }
 
+    // ====== Motyw: ustawianie i zapisywanie ======
+    function applyTheme(theme){
+      document.body.setAttribute('data-theme', theme);
+      // zaznacz radio
+      const light = qs('#theme-light');
+      const dark = qs('#theme-dark');
+      if (theme === 'light') { light.checked = true; dark.checked = false; }
+      else { dark.checked = true; light.checked = false; }
+      // odśwież kolory istniejących linii
+      const color = getVar('--line') || 'rgba(229,231,235,.9)';
+      lines.forEach(({ line }) => line.setOptions({ color }));
+    }
+
+    function initTheme(){
+      const saved = localStorage.getItem('theme');
+      const preferred = saved || 'dark';
+      applyTheme(preferred);
+      qs('#theme-light').addEventListener('change', (e)=> {
+        if (e.target.checked){ localStorage.setItem('theme','light'); applyTheme('light'); }
+      });
+      qs('#theme-dark').addEventListener('change', (e)=> {
+        if (e.target.checked){ localStorage.setItem('theme','dark'); applyTheme('dark'); }
+      });
+    }
+
     // ====== Inicjalizacja ======
     function init(){
-      // Render
-      renderColumns();
+      initTheme();           // 1) motyw
+      renderColumns();       // 2) render słów
 
       // Zdarzenia UI
       qs('#addBtn').addEventListener('click', addCustomWord);
@@ -554,6 +733,26 @@
       // reposition lines on window updates
       window.addEventListener('resize', syncLines);
       window.addEventListener('scroll', syncLines, true);
+
+      // MOBILE UX: podczas pisania linie chowamy, by nic nie zasłaniały
+      const hide = () => document.body.classList.add('hide-lines');
+      const show = () => document.body.classList.remove('hide-lines');
+      const inputs = [qs('#englishInput'), qs('#polishInput')];
+      inputs.forEach(i => {
+        i.addEventListener('focus', hide);
+        i.addEventListener('blur', show);
+        i.addEventListener('input', hide);
+      });
+
+      // Dodatkowo – podczas dotykania/przewijania na mobile
+      let touchTimer = null;
+      window.addEventListener('touchstart', () => {
+        hide();
+        if (touchTimer) clearTimeout(touchTimer);
+      }, {passive:true});
+      window.addEventListener('touchend', () => {
+        touchTimer = setTimeout(show, 180);
+      }, {passive:true});
     }
 
     document.addEventListener('DOMContentLoaded', init);
