@@ -1,761 +1,260 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Łączenie słów.</title>
-  <!-- LeaderLine -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js" defer></script>
+<meta charset="UTF-8">
+<title>Łączenie słów – Zwierzęta i środowiska</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js"></script>
+<style>
+  body { 
+    font-family: Arial, sans-serif; 
+    background-color: #f3f3f3; 
+    text-align: center; 
+    margin: 0;
+    padding: 0;
+  }
 
-  <style>
-    /* ====== Zmienne motywów ====== */
-    :root {
-      /* domyślnie CIEMNY (jak w Twoim kodzie) */
-      --bg-start: #0b1220;
-      --bg-end: #0b1220;
-      --card: #111827cc;
-      --text: #e5e7eb;
-      --muted: #9aa3b2;
-      --primary: #5b8def;
-      --primary-600: #4478ec;
-      --accent: #60d2c6;
-      --accent-600: #43c4b5;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --success: #10b981;
-      --pill: #1f2937;
-      --pill-border: #334155;
-      --line: rgba(229,231,235,.9);
-      --shadow: 0 10px 30px rgba(0, 0, 0, .25);
-      --radius: 18px;
-      --chip-bg: #0f172a;
-      --progress-bg: #0f172a;
-    }
+  h1 {
+    font-size: 2.2em;
+    color: #444;
+    margin-top: 20px;
+  }
 
-    /* Wersja JASNA – aktywuje się gdy <body data-theme="light"> */
-    body[data-theme="light"] {
-      --bg-start: #f7f9fc;
-      --bg-end: #eef3ff;
-      --card: #ffffffcc;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --primary: #5b8def;
-      --primary-600: #4478ec;
-      --accent: #60d2c6;
-      --accent-600: #43c4b5;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --success: #10b981;
-      --pill: #fff7d6;
-      --pill-border: #c9b85a;
-      --line: rgba(31,41,55,.85);
-      --shadow: 0 10px 30px rgba(17,24,39,.08);
-      --chip-bg: #eef2ff;
-      --progress-bg: #e5e7eb;
-    }
+  .instructions {
+    font-size: 1.2em;
+    margin: 15px auto;
+    color: #666;
+    max-width: 80%;
+    padding: 10px;
+    background: #ffffff;
+    border-radius: 10px;
+  }
 
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 20px;
+    padding: 20px;
+  }
 
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      background: linear-gradient(160deg, var(--bg-start), var(--bg-end));
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      transition: background .2s ease, color .2s ease;
-    }
+  .column {
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-    .wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 24px clamp(12px, 2vw, 32px);
-    }
+  .word {
+    padding: 15px 25px;
+    margin: 10px;
+    border-radius: 20px;
+    border: 2px solid #333;
+    background-color: #ffeb3b;
+    cursor: pointer;
+    user-select: none;
+    font-size: 1.5em;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+    min-width: 200px;
+    position: relative;
+  }
 
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin: 8px 0 16px;
-      flex-wrap: wrap;
-    }
+  .word:hover {
+    transform: scale(1.05);
+    background-color: #ffd600;
+  }
 
-    h1 {
-      font-size: clamp(22px, 3vw, 32px);
-      margin: 0;
-      letter-spacing: 0.2px;
-      color: var(--text);
-    }
+  .selected {
+    background-color: blue;
+    color: white;
+  }
 
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
+  .sound-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+  }
 
-    .card {
-      background: var(--card);
-      backdrop-filter: blur(6px);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: clamp(14px, 2vw, 22px);
-      border: 1px solid rgba(148, 163, 184, .18);
-      transition: background .2s ease, box-shadow .2s ease, border-color .2s ease;
-    }
+  .sound-btn:hover {
+    color: #2196F3;
+  }
 
-    .instructions {
-      color: var(--muted);
-      font-size: clamp(14px, 1.7vw, 16px);
-      margin: 6px 0 18px;
-    }
+  .buttons-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    gap: 15px;
+  }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
+  button {
+    padding: 15px 25px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    transition: all 0.3s;
+  }
 
-    /* Mobile – jedna kolumna, wygodne klikanie */
-    @media (max-width: 700px) {
-      .grid { grid-template-columns: 1fr; }
-      .column { min-height: 0; }
-      .footerbar { flex-direction: column; align-items: stretch; gap: 10px; }
-      .progress { width: 100%; }
-      .toolbar { width: 100%; justify-content: flex-start; }
-    }
+  #checkButton {
+    background-color: #4CAF50;
+    color: white;
+  }
 
-    .column {
-      min-height: 460px;
-      display: grid;
-      align-content: start;
-      gap: 12px;
-      position: relative; /* dla linii */
-      padding-bottom: 6px;
-    }
+  #checkButton:hover {
+    background-color: #388E3C;
+  }
 
-    .col-title {
-      font-weight: 600;
-      color: var(--muted);
-      letter-spacing: .3px;
-      margin-bottom: 6px;
-    }
+  #refreshButton {
+    background-color: #F44336;
+    color: white;
+  }
 
-    .word {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      padding: 14px 18px;
-      border-radius: 999px;
-      border: 2px solid var(--pill-border);
-      background: var(--pill);
-      user-select: none;
-      cursor: pointer;
-      font-weight: 700;
-      letter-spacing: .2px;
-      font-size: clamp(16px, 1.9vw, 20px);
-      transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
-      box-shadow: 0 2px 0 rgba(0,0,0,.25);
-      min-height: 52px; /* większy hitbox na mobile */
-      color: var(--text);
-    }
+  #refreshButton:hover {
+    background-color: #D32F2F;
+  }
 
-    .word:hover { transform: translateY(-1px); }
-    .word:active { transform: translateY(0); }
-
-    .word.selected {
-      outline: 3px solid color-mix(in oklab, var(--primary) 60%, transparent);
-      border-color: var(--primary);
-      box-shadow: 0 6px 18px rgba(69, 108, 255, .25);
-      background: var(--chip-bg);
-    }
-
-    .word.disabled {
-      opacity: .6;
-      cursor: not-allowed;
-      filter: saturate(.85);
-    }
-
-    .inputs {
-      display: grid;
-      grid-template-columns: 1fr 1fr auto;
-      gap: 10px;
-      align-items: center;
-    }
-
-    @media (max-width: 560px) {
-      .inputs { grid-template-columns: 1fr; }
-      .inputs .btn { width: 100%; }
-    }
-
-    .inputs input {
-      height: 46px;
-      border-radius: 12px;
-      border: 1px solid rgba(100,116,139,.35);
-      padding: 10px 14px;
-      font-size: 16px;
-      background: var(--chip-bg);
-      color: var(--text);
-      outline: none;
-      box-shadow: inset 0 1px 0 rgba(0,0,0,.25);
-      transition: background .2s ease, color .2s ease, border-color .2s ease;
-    }
-
-    .btn {
-      height: 46px;
-      padding: 0 16px;
-      border: none;
-      border-radius: 12px;
-      font-weight: 700;
-      letter-spacing: .2px;
-      cursor: pointer;
-      transition: transform .1s ease, box-shadow .2s ease, background .15s ease, filter .15s;
-      box-shadow: 0 6px 16px rgba(0,0,0,.25);
-      color: #0b1220;
-    }
-
-    .btn:active { transform: translateY(1px); }
-
-    .btn.primary { background: var(--primary); color: #fff; }
-    .btn.primary:hover { background: var(--primary-600); }
-
-    .btn.accent { background: var(--accent); color: #0b3b35; }
-    .btn.accent:hover { background: var(--accent-600); }
-
-    .btn.warn { background: var(--warning); color: #3b2a00; }
-    .btn.warn:hover { filter: brightness(.95); }
-
-    .btn.danger { background: var(--danger); color: #fff; }
-    .btn.danger:hover { filter: brightness(.95); }
-
-    .footerbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 16px;
-    }
-
-    .score {
-      font-weight: 700;
-      color: var(--muted);
-    }
-
-    .progress {
-      width: 220px;
-      height: 10px;
-      background: var(--progress-bg);
-      border-radius: 999px;
-      overflow: hidden;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,.5);
-      transition: background .2s ease;
-    }
-
-    .progress > span {
-      display: block;
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--accent), var(--primary));
-      transition: width .3s ease;
-    }
-
-    .hint {
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    .columns-card { position: relative; isolation: isolate; }
-
-    /* miejsce na linie (nad kartą, ale pod słowami) – dla porządku */
-    .lines-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* słowa powinny być nad liniami */
-    .columns-content { position: relative; z-index: 2; }
-
-    /* LeaderLine – ważne dla mobile */
-    .leader-line {
-      z-index: 0 !important;
-      pointer-events: none !important;
-      transition: opacity .15s ease;
-    }
-    body.hide-lines .leader-line { opacity: 0; }
-
-    /* Notyfikacje */
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 24px;
-      transform: translateX(-50%);
-      background: #111827;
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 10px;
-      box-shadow: var(--shadow);
-      opacity: 0;
-      transition: opacity .2s ease, transform .2s ease;
-      pointer-events: none;
-      font-size: 14px;
-      z-index: 50;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
-
-    /* Stopka z podpisem i przyciskiem GitHub */
-    .site-footer {
-      margin-top: 22px;
-      padding: 16px;
-      color: var(--muted);
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .github-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: var(--chip-bg);
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(0,0,0,.35);
-      transition: background .2s ease, color .2s ease, filter .15s;
-    }
-    .github-btn:hover { filter: brightness(1.06); }
-    .github-btn svg { width: 18px; height: 18px; fill: currentColor; display: block; }
-
-    /* ====== Przełącznik motywu (radio) ====== */
-    .theme-switch {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 6px;
-      background: var(--card);
-      border: 1px solid rgba(148, 163, 184, .18);
-      border-radius: 999px;
-      box-shadow: var(--shadow);
-    }
-    .theme-switch .opt {
-      position: relative;
-    }
-    .theme-switch input {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 0;
-      height: 0;
-      position: absolute;
-      opacity: 0;
-    }
-    .theme-switch label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 700;
-      color: var(--muted);
-      user-select: none;
-      transition: background .15s ease, color .15s ease, box-shadow .15s;
-    }
-    .theme-switch input:checked + label {
-      background: var(--accent);
-      color: #0b3b35;
-      box-shadow: 0 4px 12px rgba(0,0,0,.15);
-    }
-    .theme-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-      background: currentColor;
-      display: inline-block;
-    }
-  </style>
+  .feedback {
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>Łączenie słów.</h1>
-        <p class="instructions">Kliknij słowo po angielsku, a następnie jego polski odpowiednik, aby utworzyć połączenie.</p>
-      </div>
 
-      <div class="toolbar">
-        <!-- Przełącznik motywu (radio) -->
-        <div class="theme-switch" role="radiogroup" aria-label="Wybór motywu">
-          <div class="opt">
-            <input type="radio" name="theme" id="theme-light" value="light" />
-            <label for="theme-light" title="Jasny">
-              <span class="theme-dot" style="color:#fbc02d"></span> Jasny
-            </label>
-          </div>
-          <div class="opt">
-            <input type="radio" name="theme" id="theme-dark" value="dark" />
-            <label for="theme-dark" title="Ciemny">
-              <span class="theme-dot" style="color:#94a3b8"></span> Ciemny
-            </label>
-          </div>
-        </div>
+<h1>Nauka angielskiego: Zwierzęta i ich środowiska</h1>
+<p class="instructions">Kliknij angielskie słowo, aby je połączyć z polskim. Możesz także kliknąć 🔊, aby usłyszeć jego wymowę.</p>
 
-        <button id="fullscreenBtn" class="btn accent" type="button" aria-label="Przełącz pełny ekran">⤢ Pełny ekran</button>
-        <button id="shuffleBtn" class="btn warn" type="button">🔀 Mieszaj</button>
-        <button id="resetBtn" class="btn danger" type="button">🔄 Reset</button>
-      </div>
-    </header>
+<div class="container">
+  <div class="column" id="englishWords"></div>
+  <div class="column" id="polishWords"></div>
+</div>
 
-    <section class="card" style="margin-bottom:14px;">
-      <div class="inputs">
-        <input id="englishInput" placeholder="Angielskie słowo" autocomplete="off" />
-        <input id="polishInput" placeholder="Polskie słowo" autocomplete="off" />
-        <button id="addBtn" class="btn primary" type="button">➕ Dodaj</button>
-      </div>
-      <p class="hint" style="margin-top:8px;">Podpowiedź: dodawaj własne pary, by rozszerzać zestaw. Kliknij <strong>Sprawdź</strong>, aby zobaczyć wynik.</p>
-    </section>
+<div class="buttons-container">
+  <button id="checkButton" onclick="checkAnswers()">✅ Sprawdź odpowiedzi</button>
+  <button id="refreshButton" onclick="resetWords()">🔄 Resetuj zestaw</button>
+</div>
 
-    <section class="card columns-card">
-      <div class="lines-layer" aria-hidden="true"></div>
+<p class="feedback" id="feedbackText"></p>
 
-      <div class="columns-content grid">
-        <div>
-          <div class="col-title">English</div>
-          <div id="englishCol" class="column" aria-label="Angielskie słowa"></div>
-        </div>
-        <div>
-          <div class="col-title">Polski</div>
-          <div id="polishCol" class="column" aria-label="Polskie słowa"></div>
-        </div>
-      </div>
+<script>
+  // ✅ Nowy zestaw słów – zwierzęta i środowiska
+  const words = [
+    { "pl": "kangur", "en": "kangaroo" },
+    { "pl": "nosorożec", "en": "rhino" },
+    { "pl": "tygrys", "en": "tiger" },
+    { "pl": "gepard", "en": "cheetah" },
+    { "pl": "krokodyl", "en": "crocodile" },
+    { "pl": "jaszczurka", "en": "lizard" },
+    { "pl": "wieloryb", "en": "whale" },
+    { "pl": "rekin", "en": "shark" },
+    { "pl": "goryl", "en": "gorilla" },
+    { "pl": "dżungla", "en": "jungle" },
+    { "pl": "sawanna", "en": "grasslands" },
+    { "pl": "pustynia", "en": "desert" },
+    { "pl": "rzeka", "en": "river" },
+    { "pl": "morze", "en": "sea" }
+  ];
 
-      <div class="footerbar">
-        <div class="left" style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button id="checkBtn" class="btn primary" type="button">✅ Sprawdź odpowiedzi</button>
-          <button id="undoBtn" class="btn" type="button" style="background:var(--chip-bg);color:var(--text);">↶ Cofnij połączenie</button>
-        </div>
-        <div class="right" style="display:flex;align-items:center;gap:12px;min-width:220px;">
-          <span id="scoreText" class="score">Poprawne: 0 / 0</span>
-          <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
-        </div>
-      </div>
-    </section>
+  let lastSelected = null;
+  let lines = [];
 
-    <!-- Stopka z podpisem i linkiem do GitHuba -->
-    <footer class="site-footer">
-      <div>
-        © 2025 <strong>zowlikC</strong> — „Angielski dla mechanika / narzędziowca (moduł osobny część projektu SRS Fiszki)”
-      </div>
-      <a class="github-btn" href="https://github.com/zolwikC" target="_blank" rel="noopener">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.45.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-        GitHub profil
-      </a>
-    </footer>
-  </div>
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  function setupWords() {
+    document.getElementById('englishWords').innerHTML = "";
+    document.getElementById('polishWords').innerHTML = "";
+    
+    let englishWords = [...words];
+    let polishWords = [...words];
 
-  <script>
-    // ====== Dane początkowe ======
-    const initialWords = [
-      { pl: "Zupa", en: "Soup" },
-      { pl: "Sałatka", en: "Salad" },
-      { pl: "Pizza", en: "Pizza" },
-      { pl: "Kapusta", en: "Cabbage" },
-      { pl: "Frytki", en: "Chips" },
-      { pl: "Pulpety", en: "Meatballs" },
-      { pl: "Makaron", en: "Pasta" },
-      { pl: "Kurczak", en: "Chicken" },
-      { pl: "Herbata", en: "Tea" },
-      { pl: "Śniadanie", en: "Breakfast" },
-      { pl: "Przekąska", en: "Snack" },
-      { pl: "Obiad", en: "Dinner" },
-      { pl: "Lunch", en: "Lunch" }
-    ];
+    shuffleArray(englishWords);
+    shuffleArray(polishWords);
 
-    // ====== Stan gry ======
-    let words = [...initialWords];
-    let englishPool = []; // DOM elementy
-    let polishPool = [];
-    let selected = null;  // {el, lang, text}
-    let lines = [];       // { line, fromEl, toEl, fromText, toText }
+    englishWords.forEach(({ en }) => createWordElement(en, 'englishWords', true));
+    polishWords.forEach(({ pl }) => createWordElement(pl, 'polishWords', false));
 
-    // Blokada: jedno słowo -> max 1 połączenie
-    const usedEnglish = new WeakSet();
-    const usedPolish = new WeakSet();
+    lines.forEach(({ line }) => line.remove());
+    lines = [];
+  }
 
-    const qs = (sel) => document.querySelector(sel);
-    const getVar = (name) => getComputedStyle(document.body).getPropertyValue(name).trim();
+  // 🆕 Funkcja odtwarzania dźwięku
+  function speakWord(word) {
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = 'en-US';
+    speechSynthesis.speak(utterance);
+  }
 
-    // ====== Utils ======
-    function shuffle(arr){
-      for(let i = arr.length - 1; i > 0; i--){
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
+  function createWordElement(text, columnId, isEnglish) {
+    const div = document.createElement('div');
+    div.className = 'word';
+    div.textContent = text;
+
+    // 🆕 Jeśli to angielskie słowo, dodaj przycisk dźwięku
+    if (isEnglish) {
+      const btn = document.createElement('button');
+      btn.className = 'sound-btn';
+      btn.innerHTML = '🔊';
+      btn.onclick = (e) => {
+        e.stopPropagation(); // żeby kliknięcie nie uruchamiało połączenia
+        speakWord(text);
+      };
+      div.appendChild(btn);
     }
 
-    function toast(msg, ms = 1600){
-      const t = qs('#toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(()=> t.classList.remove('show'), ms);
-    }
+    document.getElementById(columnId).appendChild(div);
+    div.addEventListener('click', () => connectWords(div, text));
+  }
 
-    // ====== Tworzenie słów ======
-    function createWordEl(text, lang){
-      const el = document.createElement('button');
-      el.type = 'button';
-      el.className = 'word';
-      el.textContent = text;
-      el.setAttribute('data-lang', lang);
-      el.setAttribute('aria-pressed', 'false');
-
-      el.addEventListener('click', () => onWordClick(el, lang, text));
-      return el;
-    }
-
-    function renderColumns(){
-      const engCol = qs('#englishCol');
-      const plCol = qs('#polishCol');
-      engCol.innerHTML = '';
-      plCol.innerHTML = '';
-
-      const eng = [...words];
-      const pl = [...words];
-      shuffle(eng); shuffle(pl);
-
-      englishPool = eng.map(w => createWordEl(w.en, 'en'));
-      polishPool = pl.map(w => createWordEl(w.pl, 'pl'));
-
-      englishPool.forEach(el => engCol.appendChild(el));
-      polishPool.forEach(el => plCol.appendChild(el));
-
-      // Po rerenderze trzeba przerysować linie
-      removeAllLines();
-      updateScore();
-    }
-
-    // ====== Logika łączenia ======
-    function onWordClick(el, lang, text){
-      // zablokowane elementy (już połączone)
-      if ((lang === 'en' && usedEnglish.has(el)) || (lang === 'pl' && usedPolish.has(el))) {
-        toast('To słowo już jest połączone.');
+  function connectWords(div, text) {
+    if (lastSelected && lastSelected.div === div) {
+        div.classList.remove('selected');
+        lastSelected = null;
         return;
-      }
-
-      if (!selected){
-        selected = { el, lang, text };
-        el.classList.add('selected');
-        el.setAttribute('aria-pressed', 'true');
-        return;
-      }
-
-      // Kliknięcie w ten sam element = anuluj wybór
-      if (selected.el === el){
-        el.classList.remove('selected');
-        el.setAttribute('aria-pressed', 'false');
-        selected = null;
-        return;
-      }
-
-      // Dozwolone łączenie tylko EN -> PL lub PL -> EN
-      if (selected.lang === lang){
-        // zmień wybór w tej samej kolumnie
-        selected.el.classList.remove('selected');
-        selected.el.setAttribute('aria-pressed', 'false');
-        selected = { el, lang, text };
-        el.classList.add('selected');
-        el.setAttribute('aria-pressed', 'true');
-        return;
-      }
-
-      // Utwórz linię
-      const from = selected.lang === 'en' ? selected.el : el;
-      const to   = selected.lang === 'en' ? el : selected.el;
-      const fromText = (selected.lang === 'en') ? selected.text : text; // en
-      const toText   = (selected.lang === 'en') ? text : selected.text; // pl
-
-      const line = new LeaderLine(from, to, {
-        color: getVar('--line') || 'rgba(229,231,235,.9)',
-        size: 3,
-        startPlug: 'behind',
-        endPlug: 'arrow3',
-        path: window.innerWidth <= 700 ? 'straight' : 'fluid', // na mobile prościej
-        dropShadow: true,
-        startSocket: 'right',
-        endSocket: 'left',
-      });
-
-      lines.push({ line, fromEl: from, toEl: to, fromText, toText });
-
-      // Zablokuj wykorzystane słowa
-      usedEnglish.add(from);
-      usedPolish.add(to);
-      from.classList.add('disabled');
-      to.classList.add('disabled');
-
-      // Wyczyść wybór
-      selected.el.classList.remove('selected');
-      selected.el.setAttribute('aria-pressed', 'false');
-      selected = null;
-
-      updateScore(false);
     }
 
-    function removeAllLines(){
-      lines.forEach(({ line }) => line.remove());
-      lines = [];
-      // odblokuj słowa
-      [...englishPool, ...polishPool].forEach(el => {
-        el.classList.remove('disabled', 'selected');
-        el.setAttribute('aria-pressed', 'false');
-      });
-      // reset zestawów
-      englishPool.forEach(el => usedEnglish.delete(el));
-      polishPool.forEach(el => usedPolish.delete(el));
+    if (lastSelected && lastSelected.div.parentNode !== div.parentNode) {
+        const line = new LeaderLine(lastSelected.div, div, { color: 'black', size: 2 });
+        lines.push({ line, start: lastSelected.text, end: text });
+        lastSelected.div.classList.remove('selected');
+        lastSelected = null;
+    } else {
+        if (lastSelected) lastSelected.div.classList.remove('selected');
+        lastSelected = { div, text };
+        div.classList.add('selected');
     }
+  }
 
-    function undoLast(){
-      const last = lines.pop();
-      if (!last){ toast('Brak połączeń do cofnięcia.'); return; }
-      last.line.remove();
-      last.fromEl.classList.remove('disabled');
-      last.toEl.classList.remove('disabled');
-      usedEnglish.delete(last.fromEl);
-      usedPolish.delete(last.toEl);
-      updateScore(false);
-    }
+  function checkAnswers() {
+    let correctCount = 0;
+    lines.forEach(({ line, start, end }) => {
+      const isCorrect = words.some(word => 
+        (word.en === start && word.pl === end) || (word.pl === start && word.en === end)
+      );
+      line.setOptions({ color: isCorrect ? 'green' : 'red' });
+      if (isCorrect) correctCount++;
+    });
+    document.getElementById('feedbackText').textContent = `✔️ Poprawne odpowiedzi: ${correctCount}/${lines.length}`;
+  }
 
-    function checkAnswers(){
-      if (!lines.length){ toast('Najpierw utwórz przynajmniej jedno połączenie.'); return; }
-      let correct = 0;
-      lines.forEach(({ line, fromText, toText }) => {
-        const ok = words.some(w => w.en === fromText && w.pl === toText);
-        line.setOptions({ color: ok ? 'rgba(16,185,129,.95)' : 'rgba(239,68,68,.95)', size: 4 });
-        if (ok) correct++;
-      });
-      updateScore(true, correct, lines.length);
-    }
+  function resetWords() {
+    setupWords();
+    document.getElementById('feedbackText').textContent = "";
+  }
 
-    function updateScore(afterCheck = false, correct = 0, total = 0){
-      const scoreEl = qs('#scoreText');
-      if (afterCheck) {
-        scoreEl.textContent = `Poprawne: ${correct} / ${total}`;
-        qs('#progressBar').style.width = total ? `${(correct / total) * 100}%` : '0%';
-      } else {
-        scoreEl.textContent = `Połączeń: ${lines.length}`;
-        const denom = Math.max(words.length, 1);
-        qs('#progressBar').style.width = `${(lines.length / denom) * 100}%`;
-      }
-    }
-
-    function addCustomWord(){
-      const en = qs('#englishInput').value.trim();
-      const pl = qs('#polishInput').value.trim();
-      if (!en || !pl){ toast('Uzupełnij oba pola.'); return; }
-      if (words.some(w => w.en.toLowerCase() === en.toLowerCase() || w.pl.toLowerCase() === pl.toLowerCase())){
-        toast('Taka para już istnieje.'); return;
-      }
-      words.push({ en, pl });
-      qs('#englishInput').value = '';
-      qs('#polishInput').value = '';
-      toast('Dodano nową parę słów ✔');
-      renderColumns();
-    }
-
-    function shuffleAll(){ renderColumns(); toast('Wymieszano słowa.'); }
-
-    function hardReset(){
-      words = [...initialWords];
-      selected = null; removeAllLines(); renderColumns();
-      toast('Zestaw zresetowany.');
-    }
-
-    // ====== Fullscreen (na żądanie) ======
-    function toggleFullscreen(){
-      const d = document;
-      if (!d.fullscreenElement) {
-        const el = d.documentElement;
-        (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen).call(el);
-      } else {
-        (d.exitFullscreen || d.webkitExitFullscreen || d.mozCancelFullScreen || d.msExitFullscreen).call(d);
-      }
-    }
-
-    // Aktualizacja pozycji linii przy zmianie rozmiaru/przewinięciu
-    function syncLines(){ lines.forEach(({ line }) => line.position()); }
-
-    // ====== Motyw: ustawianie i zapisywanie ======
-    function applyTheme(theme){
-      document.body.setAttribute('data-theme', theme);
-      // zaznacz radio
-      const light = qs('#theme-light');
-      const dark = qs('#theme-dark');
-      if (theme === 'light') { light.checked = true; dark.checked = false; }
-      else { dark.checked = true; light.checked = false; }
-      // odśwież kolory istniejących linii
-      const color = getVar('--line') || 'rgba(229,231,235,.9)';
-      lines.forEach(({ line }) => line.setOptions({ color }));
-    }
-
-    function initTheme(){
-      const saved = localStorage.getItem('theme');
-      const preferred = saved || 'dark';
-      applyTheme(preferred);
-      qs('#theme-light').addEventListener('change', (e)=> {
-        if (e.target.checked){ localStorage.setItem('theme','light'); applyTheme('light'); }
-      });
-      qs('#theme-dark').addEventListener('change', (e)=> {
-        if (e.target.checked){ localStorage.setItem('theme','dark'); applyTheme('dark'); }
-      });
-    }
-
-    // ====== Inicjalizacja ======
-    function init(){
-      initTheme();           // 1) motyw
-      renderColumns();       // 2) render słów
-
-      // Zdarzenia UI
-      qs('#addBtn').addEventListener('click', addCustomWord);
-      qs('#checkBtn').addEventListener('click', checkAnswers);
-      qs('#undoBtn').addEventListener('click', undoLast);
-      qs('#shuffleBtn').addEventListener('click', shuffleAll);
-      qs('#resetBtn').addEventListener('click', hardReset);
-      qs('#fullscreenBtn').addEventListener('click', toggleFullscreen);
-
-      // reposition lines on window updates
-      window.addEventListener('resize', syncLines);
-      window.addEventListener('scroll', syncLines, true);
-
-      // MOBILE UX: podczas pisania linie chowamy, by nic nie zasłaniały
-      const hide = () => document.body.classList.add('hide-lines');
-      const show = () => document.body.classList.remove('hide-lines');
-      const inputs = [qs('#englishInput'), qs('#polishInput')];
-      inputs.forEach(i => {
-        i.addEventListener('focus', hide);
-        i.addEventListener('blur', show);
-        i.addEventListener('input', hide);
-      });
-
-      // Dodatkowo – podczas dotykania/przewijania na mobile
-      let touchTimer = null;
-      window.addEventListener('touchstart', () => {
-        hide();
-        if (touchTimer) clearTimeout(touchTimer);
-      }, {passive:true});
-      window.addEventListener('touchend', () => {
-        touchTimer = setTimeout(show, 180);
-      }, {passive:true});
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
+  window.onload = setupWords;
+</script>
 </body>
 </html>

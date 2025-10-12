@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Nauka angielskiego – Zwierzęta i ich środowiska</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f7f7f7;
+    text-align: center;
+    padding: 20px;
+  }
+
+  h1 {
+    color: #333;
+  }
+
+  .mode-buttons button {
+    margin: 10px;
+    padding: 15px 25px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  .mode-buttons button:hover {
+    background-color: #388E3C;
+  }
+
+  .section {
+    display: none;
+    margin-top: 30px;
+  }
+
+  input[type="text"], textarea {
+    width: 80%;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    margin: 10px 0;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  .result {
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 10px;
+  }
+
+  .correct {
+    color: green;
+  }
+
+  .wrong {
+    color: red;
+  }
+
+  .question {
+    font-size: 1.3em;
+    margin-bottom: 10px;
+  }
+
+  .audio-btn {
+    font-size: 1.2em;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #333;
+  }
+
+  .audio-btn:hover {
+    color: #2196F3;
+  }
+
+</style>
+</head>
+<body>
+
+<h1>🐾 Nauka angielskiego – Zwierzęta i ich środowiska</h1>
+
+<div class="mode-buttons">
+  <button onclick="showSection('listening')">🎧 Tryb słuchania i pisowni</button>
+  <button onclick="showSection('sentences')">✏️ Tryb budowania zdań</button>
+  <button onclick="showSection('questions')">❓ Tryb pytań i odpowiedzi</button>
+</div>
+
+<!-- 🎧 TRYB 1: SŁUCHANIE -->
+<div id="listening" class="section">
+  <h2>🎧 Słuchaj i wpisz nazwę zwierzęcia</h2>
+  <p>Kliknij przycisk, aby usłyszeć słowo. Następnie wpisz je po angielsku.</p>
+  <button onclick="playWord()">🔊 Odtwórz słowo</button><br>
+  <input type="text" id="wordInput" placeholder="Wpisz słowo po angielsku">
+  <button onclick="checkWord()">✅ Sprawdź</button>
+  <div id="result" class="result"></div>
+</div>
+
+<!-- ✏️ TRYB 2: BUDOWANIE ZDAŃ -->
+<div id="sentences" class="section">
+  <h2>✏️ Napisz zdania o zwierzętach</h2>
+  <p>Użyj czasowników <b>eat / don't eat</b> oraz <b>live / don't live</b>.</p>
+  <div class="question" id="animalSentence"></div>
+  <textarea id="sentenceInput" rows="3" placeholder="Np. Tigers eat meat."></textarea><br>
+  <button onclick="checkSentence()">✅ Sprawdź zdanie</button>
+  <div id="sentenceResult" class="result"></div>
+</div>
+
+<!-- ❓ TRYB 3: PYTANIA I ODPOWIEDZI -->
+<div id="questions" class="section">
+  <h2>❓ Napisz pytanie i odpowiedź</h2>
+  <div class="question" id="questionAnimal"></div>
+  <textarea id="questionInput" rows="2" placeholder="Np. Where do tigers live?"></textarea><br>
+  <textarea id="answerInput" rows="2" placeholder="Np. They live in the jungle."></textarea><br>
+  <button onclick="checkQuestion()">✅ Sprawdź</button>
+  <div id="questionResult" class="result"></div>
+</div>
+
+<script>
+  const words = [
+    { en: "kangaroo", pl: "kangur", env: "grasslands" },
+    { en: "rhino", pl: "nosorożec", env: "grasslands" },
+    { en: "tiger", pl: "tygrys", env: "jungle" },
+    { en: "cheetah", pl: "gepard", env: "grasslands" },
+    { en: "crocodile", pl: "krokodyl", env: "river" },
+    { en: "lizard", pl: "jaszczurka", env: "desert" },
+    { en: "whale", pl: "wieloryb", env: "sea" },
+    { en: "shark", pl: "rekin", env: "sea" },
+    { en: "gorilla", pl: "goryl", env: "jungle" }
+  ];
+
+  let currentWord = null;
+
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+    if (id === 'listening') newWord();
+    if (id === 'sentences') newSentence();
+    if (id === 'questions') newQuestion();
+  }
+
+  // 🎧 TRYB 1
+  function newWord() {
+    currentWord = words[Math.floor(Math.random() * words.length)];
+  }
+
+  function playWord() {
+    if (!currentWord) newWord();
+    const utterance = new SpeechSynthesisUtterance(currentWord.en);
+    utterance.lang = 'en-US';
+    speechSynthesis.speak(utterance);
+  }
+
+  function checkWord() {
+    const input = document.getElementById('wordInput').value.trim().toLowerCase();
+    const result = document.getElementById('result');
+    if (input === currentWord.en.toLowerCase()) {
+      result.textContent = "✅ Poprawnie! To było: " + currentWord.en;
+      result.className = "result correct";
+    } else {
+      result.textContent = `❌ Błędnie. Poprawna pisownia: ${currentWord.en}`;
+      result.className = "result wrong";
+    }
+    newWord();
+    document.getElementById('wordInput').value = "";
+  }
+
+  // ✏️ TRYB 2
+  function newSentence() {
+    currentWord = words[Math.floor(Math.random() * words.length)];
+    document.getElementById('animalSentence').textContent = 
+      `Napisz zdanie o "${currentWord.en}".`;
+  }
+
+  function checkSentence() {
+    const txt = document.getElementById('sentenceInput').value.toLowerCase();
+    const result = document.getElementById('sentenceResult');
+    if (txt.includes(currentWord.en)) {
+      if (txt.includes("eat") || txt.includes("live")) {
+        result.textContent = "✅ Dobrze! Użyłeś poprawnego czasownika.";
+        result.className = "result correct";
+      } else {
+        result.textContent = "⚠️ Dodaj czasownik 'eat' lub 'live'.";
+        result.className = "result wrong";
+      }
+    } else {
+      result.textContent = "❌ Nie ma nazwy zwierzęcia w zdaniu.";
+      result.className = "result wrong";
+    }
+    document.getElementById('sentenceInput').value = "";
+    newSentence();
+  }
+
+  // ❓ TRYB 3
+  function newQuestion() {
+    currentWord = words[Math.floor(Math.random() * words.length)];
+    document.getElementById('questionAnimal').textContent = 
+      `Napisz pytanie i odpowiedź o "${currentWord.en}".`;
+  }
+
+  function checkQuestion() {
+    const q = document.getElementById('questionInput').value.toLowerCase();
+    const a = document.getElementById('answerInput').value.toLowerCase();
+    const result = document.getElementById('questionResult');
+    if (q.includes("where do") && q.includes(currentWord.en) && a.includes("they live")) {
+      result.textContent = "✅ Świetnie! Poprawna struktura pytania i odpowiedzi.";
+      result.className = "result correct";
+    } else {
+      result.textContent = "❌ Sprawdź składnię. Wzór: Where do [zwierzęta] live? They live in [miejsce].";
+      result.className = "result wrong";
+    }
+    document.getElementById('questionInput').value = "";
+    document.getElementById('answerInput').value = "";
+    newQuestion();
+  }
+</script>
+
+</body>
+</html>
