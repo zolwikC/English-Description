@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>🐾 Nauka angielskiego – Zwierzęta i środowiska + Quiz</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js"></script>
+<style>
+  body { 
+    font-family: 'Arial', sans-serif; 
+    background: linear-gradient(180deg, #f9f9f9, #e8f5e9);
+    text-align: center; 
+    margin: 0;
+    padding: 0;
+  }
+
+  h1 {
+    font-size: 2.4em;
+    color: #2e7d32;
+    margin-top: 25px;
+    text-shadow: 1px 1px 2px #ccc;
+  }
+
+  .instructions {
+    font-size: 1.1em;
+    color: #555;
+    max-width: 80%;
+    margin: 15px auto;
+    padding: 10px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 25px;
+    padding: 20px;
+  }
+
+  .column {
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .word {
+    padding: 15px 25px;
+    margin: 10px;
+    border-radius: 25px;
+    border: 2px solid #333;
+    background-color: #ffeb3b;
+    cursor: pointer;
+    user-select: none;
+    font-size: 1.4em;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+    min-width: 220px;
+    position: relative;
+  }
+
+  .word:hover {
+    transform: scale(1.05);
+    background-color: #ffd600;
+  }
+
+  .selected {
+    background-color: #2196F3;
+    color: white;
+  }
+
+  .sound-btn {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3em;
+  }
+
+  .sound-btn:hover {
+    color: #1565c0;
+  }
+
+  .buttons-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 25px;
+    gap: 15px;
+  }
+
+  button {
+    padding: 15px 25px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    transition: all 0.3s ease-in-out;
+  }
+
+  #checkButton { background-color: #4CAF50; color: white; }
+  #checkButton:hover { background-color: #388E3C; }
+
+  #refreshButton { background-color: #F44336; color: white; }
+  #refreshButton:hover { background-color: #D32F2F; }
+
+  #showTranslations { background-color: #2196F3; color: white; }
+  #showTranslations:hover { background-color: #1976D2; }
+
+  #quizButton { background-color: #ff9800; color: white; }
+  #quizButton:hover { background-color: #f57c00; }
+
+  .feedback {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-top: 25px;
+    padding: 10px 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    display: inline-block;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  p.example {
+    font-weight: normal;
+    color: #333;
+    background: #e8f5e9;
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  #quizArea {
+    display: none;
+    margin-top: 30px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    padding: 20px;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #quizQuestion {
+    font-size: 1.3em;
+    margin-bottom: 20px;
+  }
+
+  #quizButtons button {
+    margin: 10px;
+    background-color: #2196F3;
+    color: white;
+  }
+
+  #quizButtons button:hover {
+    background-color: #1976D2;
+  }
+
+</style>
+</head>
+<body>
+
+<h1>🐾 Nauka angielskiego: Zwierzęta i ich środowiska</h1>
+<p class="instructions">Tryb łączenia słów i quiz. Kliknij słowa, aby połączyć, lub uruchom quiz, by sprawdzić, ile pamiętasz!</p>
+
+<div class="container" id="matchArea">
+  <div class="column" id="englishWords"></div>
+  <div class="column" id="polishWords"></div>
+</div>
+
+<div class="buttons-container">
+  <button id="checkButton" onclick="checkAnswers()">✅ Sprawdź odpowiedzi</button>
+  <button id="showTranslations" onclick="showTranslations()">📘 Pokaż tłumaczenia</button>
+  <button id="refreshButton" onclick="resetWords()">🔄 Resetuj zestaw</button>
+  <button id="quizButton" onclick="startQuiz()">🎯 Tryb quizu</button>
+</div>
+
+<p class="feedback" id="feedbackText"></p>
+
+<div id="quizArea">
+  <h2>🎯 Tryb quizu: Prawda czy fałsz?</h2>
+  <p id="quizQuestion"></p>
+  <div id="quizButtons">
+    <button onclick="answerQuiz(true)">✅ True</button>
+    <button onclick="answerQuiz(false)">❌ False</button>
+  </div>
+  <p id="quizFeedback"></p>
+</div>
+
+<script>
+const words = [
+    { "pl": "ciało", "en": "body", "sentence": "A body helps an animal move." },
+    { "pl": "zęby", "en": "teeth", "sentence": "Teeth help an animal eat food." },
+    { "pl": "usta", "en": "mouth", "sentence": "A mouth helps an animal drink and eat." },
+    { "pl": "język", "en": "tongue", "sentence": "A tongue helps an animal taste food." },
+    { "pl": "wąsy", "en": "whiskers", "sentence": "Whiskers help animals sense their surroundings." },
+    { "pl": "skrzydła", "en": "wings", "sentence": "Wings help animals fly." },
+    { "pl": "ogon", "en": "tail", "sentence": "A tail helps an animal keep balance." },
+    { "pl": "pazury", "en": "claws", "sentence": "Claws help an animal catch food." },
+    { "pl": "łapa", "en": "paw", "sentence": "A paw helps an animal walk." },
+
+    { "pl": "krótki", "en": "short", "sentence": "The animal has a short tail." },
+    { "pl": "długi", "en": "long", "sentence": "The animal has a long tongue." },
+    { "pl": "ostry", "en": "sharp", "sentence": "The animal has sharp claws." },
+    { "pl": "silny", "en": "strong", "sentence": "The animal has strong legs." },
+    { "pl": "cienki", "en": "thin", "sentence": "The animal has a thin body." },
+    { "pl": "gruby", "en": "thick", "sentence": "The animal has thick fur." }
+];
+
+let lastSelected = null;
+let lines = [];
+let quizIndex = 0;
+let correctQuiz = 0;
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function setupWords() {
+  document.getElementById('englishWords').innerHTML = "";
+  document.getElementById('polishWords').innerHTML = "";
+  
+  let englishWords = [...words];
+  let polishWords = [...words];
+  shuffleArray(englishWords);
+  shuffleArray(polishWords);
+
+  englishWords.forEach(({ en }) => createWordElement(en, 'englishWords', true));
+  polishWords.forEach(({ pl }) => createWordElement(pl, 'polishWords', false));
+
+  lines.forEach(({ line }) => line.remove());
+  lines = [];
+}
+
+function speakWord(word) {
+  const utterance = new SpeechSynthesisUtterance(word);
+  utterance.lang = 'en-US';
+  speechSynthesis.speak(utterance);
+}
+
+function createWordElement(text, columnId, isEnglish) {
+  const div = document.createElement('div');
+  div.className = 'word';
+  div.textContent = text;
+
+  if (isEnglish) {
+    const btn = document.createElement('button');
+    btn.className = 'sound-btn';
+    btn.innerHTML = '🔊';
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      speakWord(text);
+    };
+    div.appendChild(btn);
+  }
+
+  document.getElementById(columnId).appendChild(div);
+  div.addEventListener('click', () => connectWords(div, text));
+}
+
+function connectWords(div, text) {
+  if (lastSelected && lastSelected.div === div) {
+      div.classList.remove('selected');
+      lastSelected = null;
+      return;
+  }
+
+  if (lastSelected && lastSelected.div.parentNode !== div.parentNode) {
+      const line = new LeaderLine(lastSelected.div, div, { color: 'black', size: 2 });
+      lines.push({ line, start: lastSelected.text, end: text });
+      lastSelected.div.classList.remove('selected');
+      lastSelected = null;
+  } else {
+      if (lastSelected) lastSelected.div.classList.remove('selected');
+      lastSelected = { div, text };
+      div.classList.add('selected');
+  }
+}
+
+function checkAnswers() {
+  let correctCount = 0;
+  let resultText = "";
+
+  lines.forEach(({ line, start, end }) => {
+    const match = words.find(word => 
+      (word.en === start && word.pl === end) || (word.pl === start && word.en === end)
+    );
+
+    const isCorrect = !!match;
+    line.setOptions({ color: isCorrect ? 'green' : 'red' });
+
+    if (isCorrect) {
+      correctCount++;
+      resultText += `<p class="example">✅ ${match.sentence}</p>`;
+    } else {
+      resultText += `<p class="example">❌ Wrong connection between <b>${start}</b> and <b>${end}</b>.</p>`;
+    }
+  });
+
+  document.getElementById('feedbackText').innerHTML = 
+    `✔️ Poprawne odpowiedzi: ${correctCount}/${lines.length}<br><br>${resultText}`;
+}
+
+function showTranslations() {
+  let text = "<h3>📘 Tłumaczenia:</h3>";
+  words.forEach(w => {
+    text += `<p><b>${w.en}</b> = ${w.pl}</p>`;
+  });
+  document.getElementById('feedbackText').innerHTML = text;
+}
+
+function resetWords() {
+  setupWords();
+  document.getElementById('feedbackText').textContent = "";
+}
+
+// 🎯 QUIZ LOGIKA
+function startQuiz() {
+  document.getElementById('matchArea').style.display = "none";
+  document.getElementById('quizArea').style.display = "block";
+  quizIndex = 0;
+  correctQuiz = 0;
+  nextQuizQuestion();
+}
+
+function nextQuizQuestion() {
+  if (quizIndex >= words.length) {
+    document.getElementById('quizQuestion').textContent = "Koniec quizu! ✅";
+    document.getElementById('quizFeedback').innerHTML = `Twój wynik: <b>${correctQuiz}/${words.length}</b>`;
+    return;
+  }
+
+  // czasem generuj fałszywe zdanie
+  const real = Math.random() > 0.5;
+  const correctWord = words[quizIndex];
+  const randomWord = words[Math.floor(Math.random() * words.length)];
+  const sentence = real ? correctWord.sentence : `${correctWord.sentence.split(' ')[0]} ${randomWord.en} lives in the desert.`;
+
+  document.getElementById('quizQuestion').textContent = sentence;
+  document.getElementById('quizQuestion').dataset.correct = real ? "true" : "false";
+}
+
+function answerQuiz(answer) {
+  const isCorrect = (document.getElementById('quizQuestion').dataset.correct === "true") === answer;
+  if (isCorrect) {
+    correctQuiz++;
+    document.getElementById('quizFeedback').textContent = "✅ Dobrze!";
+  } else {
+    document.getElementById('quizFeedback').textContent = "❌ Błąd!";
+  }
+  quizIndex++;
+  setTimeout(() => {
+    document.getElementById('quizFeedback').textContent = "";
+    nextQuizQuestion();
+  }, 1000);
+}
+
+window.onload = setupWords;
+</script>
+</body>
+</html>
